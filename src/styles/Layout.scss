@@ -1,0 +1,84 @@
+.Layout-Sider {
+  background-color: #2d2d2d;
+  // 侧边栏收起时的样式
+  &.ant-layout-sider-collapsed {
+    .Layout-Sider-Header {
+      width: 80px;
+      transform-origin: center;
+
+      &-Icon {
+        transform: translate(15px) rotate(90deg);
+        transition: transform 0.3s ease-in-out;
+      }
+      &-add-note {
+        width: 40px;
+        opacity: 0;
+        animation: 1s ease-in-out opacity;
+      }
+    }
+    .Layout-Sider-Menu {
+      .ant-menu-item {
+        padding: 0 25px !important;
+
+        .ant-menu-item-icon {
+          transform: scale(1.25);
+          transition: transform 0.3 ease-in-out;
+        }
+      }
+    }
+  }
+  // 侧边栏展开的样式
+  .Layout-Sider-Header {
+    width: 200px;
+    height: 60px;
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+    &-Icon {
+      transform: rotate(-90deg);
+      transition: transform 0.3s ease-in-out;
+      cursor: pointer;
+    }
+    &-add-note {
+      padding-left: 10px;
+      font-size: 20px;
+      font-family: 'Gill Sans', sans-serif;
+      font-weight: 600;
+      color: #ddd;
+      cursor: pointer;
+    }
+  }
+  .Layout-Sider-Menu {
+    background-color: #2d2d2d;
+    font-family: 'Gill Sans', sans-serif;
+    font-weight: 600;
+    .ant-menu-item {
+      padding: 0 10px 0 10px !important;
+      background-color: #2d2d2d;
+      color: #d0d0d0;
+      &-active {
+        color: #d0d0d0 !important;
+        background-color: lighten(#2d2d2d, 12%) !important;
+      }
+      &-selected {
+        background-color: #fff;
+        color: #000;
+        .ant-menu-item-icon {
+          color: #5183f5;
+          transform: scale(1.25);
+          transition: transform 0.3s linear;
+        }
+        // 强制清除 active 样式
+        &.ant-menu-item-active {
+          background-color: #fff !important;
+          color: #000 !important;
+        }
+      }
+    }
+  }
+  .ant-layout-sider-trigger {
+    background-color: #2d2d2d;
+  }
+}
