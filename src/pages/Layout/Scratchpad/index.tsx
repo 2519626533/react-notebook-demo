@@ -2,7 +2,7 @@ import EditArea from '@/components/EditArea'
 
 const Scratchpad = () => {
   return (
-    <div>
+    <div className="Scratchpad">
       <EditArea />
     </div>
   )

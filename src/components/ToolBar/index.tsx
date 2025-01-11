@@ -2,19 +2,18 @@ import type { BaseProps, TextAlginType } from '@/types/slate'
 import type { ButtonType } from '@/types/ToolBar'
 import type { PropsWithChildren, Ref } from 'react'
 import { isBlockActive, isMarkActive, TEXT_ALGIN_TYPES, toggleBlock, toggleMark } from '@/utils/editorFunctions'
-import { AlignCenterOutlined, AlignLeftOutlined, AlignRightOutlined, BoldOutlined, CodeOutlined, ItalicOutlined, OrderedListOutlined, UnderlineOutlined, UnorderedListOutlined } from '@ant-design/icons'
-import classNames from 'classnames'
-import React, { useContext } from 'react'
+import { AlignCenterOutlined, AlignLeftOutlined, AlignRightOutlined, BoldOutlined, CodeOutlined, EditFilled, FullscreenExitOutlined, ItalicOutlined, OrderedListOutlined, UnderlineOutlined, UnorderedListOutlined } from '@ant-design/icons'
+import classnames from 'classnames'
+import React, { useEffect, useRef, useState } from 'react'
 import { useSlate } from 'slate-react'
 import { AlignJustifyIcon, HeadingOneIcon, HeadingTwoIcon, QuoteIcon } from '../MyIcon'
-import './index.scss'
 
 const Button = React.forwardRef<HTMLSpanElement, PropsWithChildren<{
   active: boolean
   reversed: boolean
 } & BaseProps>>(
   ({ className, active, reversed, ...props }, ref: Ref<HTMLSpanElement>) => {
-    const buttonClass = classNames(
+    const buttonClass = classnames(
       'button-default',
       {
         'button-active': active,
@@ -72,22 +71,115 @@ const BlockButton: ButtonType = ({ format, icon }) => {
 }
 
 const ToolBar = () => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [position, setPosition] = useState({ x: 200, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [direction, setDirection] = useState<'row' | 'column' | 'row mirror' | 'column mirror'>('row')
+  const toolBarRef = useRef<HTMLDivElement | null>(null) // 工具栏ref
+  const toolBar = toolBarRef.current
+  const layoutContent = document.querySelector('.ant-layout-content')
+
+  // const editorRef = useRef<HTMLDivElement | null>(null)
+
+  const toggleToolBar = () => {
+    setIsOpen(!isOpen)
+  }
+  useEffect(() => {
+    const checkBoundary = () => {
+      if (!toolBar || !layoutContent)
+        return
+
+      const toolBarRect = toolBar.getBoundingClientRect()
+      const layoutRect = layoutContent.getBoundingClientRect()
+      if (toolBarRect.left <= layoutRect.left) {
+        setDirection('column')
+      } else if ((toolBarRect.right >= (layoutRect.right))
+        && (toolBarRect.bottom < layoutRect.bottom - 450)) { // 这里的450是展开时的height
+        setDirection('column')
+      } else if ((toolBarRect.top <= layoutRect.top)
+        && (toolBarRect.right < layoutRect.right - 540)) { // 这里的540是展开时的width
+        setDirection('row')
+      } else if (toolBarRect.bottom >= layoutRect.bottom - 10) {
+        setDirection('row')
+      }
+    }
+    checkBoundary()
+  }, [position])
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const startX = e.clientX
+    const startY = e.clientY
+    const toolBar = toolBarRef.current
+    const editor = toolBar?.nextElementSibling as HTMLElement | null
+    const layoutContent = document.querySelector('.ant-layout-content')
+
+    if (!toolBar || !editor || !layoutContent)
+      return
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      let newX = (moveEvent.clientX - startX) + position.x
+      let newY = (moveEvent.clientY - startY) + position.y
+
+      const toolBarRect = toolBar.getBoundingClientRect()
+      const layoutRect = layoutContent.getBoundingClientRect()
+
+      setIsDragging(true)
+      editor.style.pointerEvents = 'none'
+
+      if (layoutRect) {
+        const maxX = layoutRect.right - toolBarRect.width
+        const maxY = layoutRect.bottom - toolBarRect.height
+        const minX = layoutRect.left
+        const minY = layoutRect.top
+
+        newX = Math.max(minX, Math.min(newX, maxX))
+        newY = Math.max(minY, Math.min(newY, maxY))
+      }
+
+      setPosition({ x: newX, y: newY })
+    }
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      setIsDragging(false)
+      editor.style.pointerEvents = ''
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+
   return (
-    <div className="ToolBar">
-      <MarkButton format="bold" icon={<BoldOutlined />} />
-      <MarkButton format="italic" icon={<ItalicOutlined />} />
-      <MarkButton format="underline" icon={<UnderlineOutlined />} />
-      <MarkButton format="code" icon={<CodeOutlined />} />
-      <BlockButton format="heading-one" icon={<HeadingOneIcon />} />
-      <BlockButton format="heading-two" icon={<HeadingTwoIcon />} />
-      <BlockButton format="block-quote" icon={<QuoteIcon />} />
-      <BlockButton format="numbered-list" icon={<OrderedListOutlined />} />
-      <BlockButton format="bulleted-list" icon={<UnorderedListOutlined />} />
-      <BlockButton format="left" icon={<AlignLeftOutlined />} />
-      <BlockButton format="center" icon={<AlignCenterOutlined />} />
-      <BlockButton format="right" icon={<AlignRightOutlined />} />
-      <BlockButton format="justify" icon={<AlignJustifyIcon />} />
+    <div
+      ref={toolBarRef}
+      className={classnames('ToolBar-container', direction, {
+        open: isOpen,
+        dragging: isDragging,
+      })}
+      style={{ left: position.x, top: position.y }}
+      onMouseDown={handleMouseDown}
+    >
+      <div className="ToolBar-toggle" onClick={toggleToolBar}>
+        {isOpen ? <FullscreenExitOutlined style={{ color: '#FB4A4A' }} /> : <EditFilled style={{ color: '#D1F2EB' }} />}
+      </div>
+      <div className={classnames('ToolBar', direction)} style={{ display: isOpen ? '' : 'none' }}>
+        <MarkButton format="bold" icon={<BoldOutlined />} />
+        <MarkButton format="italic" icon={<ItalicOutlined />} />
+        <MarkButton format="underline" icon={<UnderlineOutlined />} />
+        <MarkButton format="code" icon={<CodeOutlined />} />
+        <BlockButton format="heading-one" icon={<HeadingOneIcon />} />
+        <BlockButton format="heading-two" icon={<HeadingTwoIcon />} />
+        <BlockButton format="block-quote" icon={<QuoteIcon />} />
+        <BlockButton format="numbered-list" icon={<OrderedListOutlined />} />
+        <BlockButton format="bulleted-list" icon={<UnorderedListOutlined />} />
+        <BlockButton format="left" icon={<AlignLeftOutlined />} />
+        <BlockButton format="center" icon={<AlignCenterOutlined />} />
+        <BlockButton format="right" icon={<AlignRightOutlined />} />
+        <BlockButton format="justify" icon={<AlignJustifyIcon />} />
+      </div>
     </div>
+
   )
 }
 

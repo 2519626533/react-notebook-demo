@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { createEditor } from 'slate'
 import { Editable, Slate, withReact } from 'slate-react'
 import ToolBar from '../ToolBar'
-import './index.scss'
 
 // EditArea主体
 const EditArea = () => {

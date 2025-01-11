@@ -4,7 +4,6 @@ import { DeleteOutlined, FormOutlined, PlusCircleTwoTone, ReconciliationOutlined
 import { Layout, Menu, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import '@/styles/Layout.scss'
 
 const { Content, Sider } = Layout
 
@@ -66,7 +65,7 @@ const LayoutPage = () => {
         />
       </Sider>
       <Layout>
-        <Content style={{ margin: '0 16px' }}>
+        <Content style={{ margin: '0px' }}>
           <Outlet></Outlet>
         </Content>
       </Layout>
