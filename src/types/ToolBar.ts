@@ -17,3 +17,8 @@ export type MyIconProps = {
 }
 
 export type MyIcon = (props: MyIconProps) => JSX.Element
+
+export type ToolBarPosition = {
+  x: number
+  y: number
+}

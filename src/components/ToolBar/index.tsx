@@ -1,10 +1,13 @@
+import type { RootState } from '@/store'
 import type { BaseProps, TextAlginType } from '@/types/slate'
 import type { ButtonType } from '@/types/ToolBar'
 import type { PropsWithChildren, Ref } from 'react'
+import { setPosition } from '@/store/toolbarstore'
 import { isBlockActive, isMarkActive, TEXT_ALGIN_TYPES, toggleBlock, toggleMark } from '@/utils/editorFunctions'
 import { AlignCenterOutlined, AlignLeftOutlined, AlignRightOutlined, BoldOutlined, CodeOutlined, EditFilled, FullscreenExitOutlined, ItalicOutlined, OrderedListOutlined, UnderlineOutlined, UnorderedListOutlined } from '@ant-design/icons'
 import classnames from 'classnames'
 import React, { useEffect, useRef, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { useSlate } from 'slate-react'
 import { AlignJustifyIcon, HeadingOneIcon, HeadingTwoIcon, QuoteIcon } from '../MyIcon'
 
@@ -72,7 +75,8 @@ const BlockButton: ButtonType = ({ format, icon }) => {
 
 const ToolBar = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [position, setPosition] = useState({ x: 200, y: 0 })
+  const position = useSelector((state: RootState) => state.toolbar.position)
+  const dispatch = useDispatch()
   const [isDragging, setIsDragging] = useState(false)
   const [direction, setDirection] = useState<'row' | 'column' | 'row mirror' | 'column mirror'>('row')
   const toolBarRef = useRef<HTMLDivElement | null>(null) // 工具栏ref
@@ -136,7 +140,7 @@ const ToolBar = () => {
         newY = Math.max(minY, Math.min(newY, maxY))
       }
 
-      setPosition({ x: newX, y: newY })
+      dispatch(setPosition({ x: newX, y: newY }))
     }
 
     const handleMouseUp = () => {
