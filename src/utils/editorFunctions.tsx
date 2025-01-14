@@ -1,8 +1,8 @@
-import type { CustomEditor, CustomFormat, CustomText, ListType, MarkType, TextAlginType } from '@/types/slate'
-import type { RenderElementProps, RenderLeafProps } from 'slate-react'
+import type { CustomEditor, CustomElement, CustomFormat, CustomText, ListType, MarkType, TextAlginType } from '@/types/slate'
 import { Leaf, MyElement } from '@/utils/editorElement'
 import { useCallback } from 'react'
 import { Editor, Element, Element as SlateElement, Transforms } from 'slate'
+import { type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -10,9 +10,12 @@ import { Editor, Element, Element as SlateElement, Transforms } from 'slate'
 */
 // 块级元素渲染
 const useRenderElement = () => {
-  return useCallback((props: RenderElementProps) => (
-    <MyElement {...props}></MyElement>
-  ), [])
+  return useCallback((props: RenderElementProps) => {
+    return (
+      <MyElement {...props}>
+      </MyElement>
+    )
+  }, [])
 }
 
 // 字符级格式渲染

@@ -5,5 +5,17 @@
   .editable {
     padding: 10px 16px;
     border: none;
+
+    [data-slate-node='element'] {
+      margin: 5px;
+      padding: 5px 2px;
+      font-size: 15px;
+      font-weight: normal;
+      font-family: inherit;
+    }
+  }
+
+  .active-line {
+    background-color: $editArea-activeLine-bcc;
   }
 }

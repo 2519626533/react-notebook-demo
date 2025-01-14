@@ -107,7 +107,12 @@ type CustomElement =
   | CodeBlockElement
   | CodeLineElement
   | { type: null, children: CustomText[] }
-  | { type: string, align?: string, children: Descendant[] }
+  | {
+    type: string
+    align?: string
+    children: Descendant[]
+    lineNumber?: number
+  }
 
 export type CustomText = {
   text: string

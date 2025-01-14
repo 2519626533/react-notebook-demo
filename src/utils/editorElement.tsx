@@ -5,6 +5,7 @@ import type { RenderElementProps, RenderLeafProps } from 'slate-react'
 const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element }) => {
   const { align = 'left' } = element as { align?: 'left' | 'right' | 'center' | 'justify' }
   const style: React.CSSProperties = { textAlign: align }
+
   switch (element.type) {
     case 'block-quote':
       return (

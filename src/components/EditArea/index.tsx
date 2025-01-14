@@ -1,12 +1,13 @@
 import type { CustomEditor, CustomElement, CustomText } from '@/types/slate'
 import { useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorFunctions'
-import { useMemo, useState } from 'react'
-import { createEditor, type Descendant, Node, type Operation } from 'slate'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { createEditor, type Descendant, Editor, Node, type Operation } from 'slate'
 import { Editable, Slate, withReact } from 'slate-react'
 import ToolBar from '../ToolBar'
 
 // EditArea主体
 const EditArea = () => {
+  const editRef = useRef<HTMLDivElement>(null)
   // 创建Slate
   const [editor] = useState(() => withReact(createEditor()))
 
@@ -52,7 +53,29 @@ const EditArea = () => {
       (op: Operation) => op.type !== 'set_selection',
     )
     if (isAstChange) {
+      value.forEach((node, index) => {
+        if ('type' in node) {
+          (node as CustomElement).lineNumber = index + 1
+        }
+      })
       localStorage.setItem('content', serialize(value))
+    }
+  }
+
+  const activeSelection = (event: React.MouseEvent<HTMLDivElement>) => {
+    const edit = editRef.current
+    if (!edit)
+      return
+    const target = event.target as HTMLElement
+
+    const lineElement = target.closest('[data-slate-node="element"]')
+
+    if (lineElement) {
+      const allLines = edit.querySelectorAll('[data-slate-node="element"]')
+      allLines.forEach((line) => {
+        line.classList.remove('active-line')
+      })
+      lineElement.classList.add('active-line')
     }
   }
 
@@ -66,11 +89,14 @@ const EditArea = () => {
         >
           <ToolBar></ToolBar>
           <Editable
+            ref={editRef}
             style={{ outline: 'none' }}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             onKeyDown={onKeyDown}
+            onMouseDown={activeSelection}
             className="editable"
+            spellCheck={false}
           />
         </Slate>
       </div>
