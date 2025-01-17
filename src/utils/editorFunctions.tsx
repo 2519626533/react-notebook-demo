@@ -1,8 +1,8 @@
 import type { CustomEditor, CustomElement, CustomFormat, CustomText, ListType, MarkType, TextAlginType } from '@/types/slate'
+import type { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { Leaf, MyElement } from '@/utils/editorElement'
 import { useCallback } from 'react'
 import { Editor, Element, Element as SlateElement, Transforms } from 'slate'
-import { type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 /*

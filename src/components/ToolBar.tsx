@@ -2,14 +2,15 @@ import type { RootState } from '@/store'
 import type { BaseProps, TextAlginType } from '@/types/slate'
 import type { ButtonType } from '@/types/ToolBar'
 import type { PropsWithChildren, Ref } from 'react'
-import { setPosition } from '@/store/toolbarstore'
+import { getPosition, setPosition } from '@/store/toolbarstore'
 import { isBlockActive, isMarkActive, TEXT_ALGIN_TYPES, toggleBlock, toggleMark } from '@/utils/editorFunctions'
 import { AlignCenterOutlined, AlignLeftOutlined, AlignRightOutlined, BoldOutlined, CodeOutlined, EditFilled, FullscreenExitOutlined, ItalicOutlined, OrderedListOutlined, UnderlineOutlined, UnorderedListOutlined } from '@ant-design/icons'
 import classnames from 'classnames'
-import React, { useEffect, useRef, useState } from 'react'
+import _ from 'lodash'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSlate } from 'slate-react'
-import { AlignJustifyIcon, HeadingOneIcon, HeadingTwoIcon, QuoteIcon } from '../MyIcon'
+import { AlignJustifyIcon, HeadingOneIcon, HeadingTwoIcon, QuoteIcon } from './MyIcon'
 
 const Button = React.forwardRef<HTMLSpanElement, PropsWithChildren<{
   active: boolean
@@ -48,8 +49,8 @@ const MarkButton: ButtonType = ({ format, icon }) => {
   )
 }
 
-export const activeContext = React.createContext<boolean>(false)
 // BlockButton组件
+export const activeContext = React.createContext<boolean>(false)
 const BlockButton: ButtonType = ({ format, icon }) => {
   const editor = useSlate()
   const isActive = isBlockActive(
@@ -68,7 +69,6 @@ const BlockButton: ButtonType = ({ format, icon }) => {
       <activeContext.Provider value={isActive}>
         {icon}
       </activeContext.Provider>
-
     </Button>
   )
 }
@@ -82,35 +82,40 @@ const ToolBar = () => {
   const toolBarRef = useRef<HTMLDivElement | null>(null) // 工具栏ref
   const toolBar = toolBarRef.current
   const layoutContent = document.querySelector('.ant-layout-content')
+  const currentWindowHeight = window.innerHeight
 
   // const editorRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    dispatch(getPosition())
+  }, [])
 
   const toggleToolBar = () => {
     setIsOpen(!isOpen)
   }
-  useEffect(() => {
-    const checkBoundary = () => {
-      if (!toolBar || !layoutContent)
-        return
 
-      const toolBarRect = toolBar.getBoundingClientRect()
-      const layoutRect = layoutContent.getBoundingClientRect()
-      if (toolBarRect.left <= layoutRect.left) {
-        setDirection('column')
-      } else if ((toolBarRect.right >= (layoutRect.right))
-        && (toolBarRect.bottom < layoutRect.bottom - 450)) { // 这里的450是展开时的height
-        setDirection('column')
-      } else if ((toolBarRect.top <= layoutRect.top)
-        && (toolBarRect.right < layoutRect.right - 540)) { // 这里的540是展开时的width
-        setDirection('row')
-      } else if (toolBarRect.bottom >= layoutRect.bottom - 10) {
-        setDirection('row')
-      }
+  const checkBoundary = useCallback(_.debounce(() => {
+    if (!toolBar || !layoutContent)
+      return
+
+    const toolBarRect = toolBar.getBoundingClientRect()
+    const layoutRect = layoutContent.getBoundingClientRect()
+    if (toolBarRect.left <= layoutRect.left) {
+      setDirection('column')
+    } else if ((toolBarRect.right >= (layoutRect.right - 2))
+      && (toolBarRect.bottom < currentWindowHeight - 450)) { // 这里的450是ToolBar展开时的height
+      setDirection('column')
+    } else if ((toolBarRect.top <= 0)
+      && (toolBarRect.right < layoutRect.right - 540)) { // 这里的540是ToolBar展开时的width
+      setDirection('row')
+    } else if (toolBarRect.bottom >= currentWindowHeight - 2) {
+      setDirection('row')
     }
+  }, 10), [currentWindowHeight])
+  useEffect(() => {
     checkBoundary()
-  }, [position])
+  }, [position, checkBoundary])
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const startX = e.clientX
     const startY = e.clientY
     const toolBar = toolBarRef.current
@@ -132,9 +137,9 @@ const ToolBar = () => {
 
       if (layoutRect) {
         const maxX = layoutRect.right - toolBarRect.width
-        const maxY = layoutRect.bottom - toolBarRect.height
+        const maxY = currentWindowHeight - toolBarRect.height
         const minX = layoutRect.left
-        const minY = layoutRect.top
+        const minY = 0
 
         newX = Math.max(minX, Math.min(newX, maxX))
         newY = Math.max(minY, Math.min(newY, maxY))
@@ -152,7 +157,7 @@ const ToolBar = () => {
 
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
-  }
+  }, [position, currentWindowHeight, dispatch])
 
   return (
     <div

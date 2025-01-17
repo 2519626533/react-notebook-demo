@@ -1,15 +1,17 @@
-import type { CustomEditor, CustomElement, CustomText } from '@/types/slate'
+import type { CustomEditor, CustomElement } from '@/types/slate'
 import { useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorFunctions'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { createEditor, type Descendant, Editor, Node, type Operation } from 'slate'
+import { createEditor, type Descendant, type Operation, Transforms } from 'slate'
+import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
-import ToolBar from '../ToolBar'
+import NoteMenuBar from './NoteMenuBar'
+import ToolBar from './ToolBar'
 
 // EditArea主体
 const EditArea = () => {
   const editRef = useRef<HTMLDivElement>(null)
   // 创建Slate
-  const [editor] = useState(() => withReact(createEditor()))
+  const editor = useMemo(() => withHistory(withReact(createEditor())), [])
 
   // 初始化数据
   const initialValue: CustomElement[] = useMemo(() =>
@@ -41,6 +43,24 @@ const EditArea = () => {
   // 处理指令函数
   const onKeyDown = useOnKeyDown(editor)
 
+  const getLineNumbers = () => {
+    editor.children.forEach((node: CustomElement, index: number) => {
+      Transforms.setNodes(
+        editor,
+        { lineNumber: index + 1 },
+        {
+          at: [index],
+          match: n => n === node,
+        },
+      )
+    })
+  }
+
+  useEffect(() => {
+    // 初始计算
+    getLineNumbers()
+  }, [editor])
+
   // 序列化
   const serialize = (value: Descendant[]) => {
     return (
@@ -53,11 +73,7 @@ const EditArea = () => {
       (op: Operation) => op.type !== 'set_selection',
     )
     if (isAstChange) {
-      value.forEach((node, index) => {
-        if ('type' in node) {
-          (node as CustomElement).lineNumber = index + 1
-        }
-      })
+      getLineNumbers()
       localStorage.setItem('content', serialize(value))
     }
   }
@@ -81,7 +97,7 @@ const EditArea = () => {
 
   return (
     <div className="notebook">
-      <div className="Slate">
+      <div className="slate">
         <Slate
           editor={editor}
           initialValue={value}
@@ -100,6 +116,7 @@ const EditArea = () => {
           />
         </Slate>
       </div>
+      <NoteMenuBar isNote={false} />
     </div>
 
   )

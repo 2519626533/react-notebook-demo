@@ -7,82 +7,93 @@ export type BlockQuoteElement = {
   type: 'block-quote'
   align?: string
   children: Descendant[]
+  lineNumber?: number
 }
 
 export type BulletedListElement = {
   type: 'bulleted-list'
   align?: string
   children: Descendant[]
+  lineNumber?: number
 }
 
 export type CheckListItemElement = {
   type: 'check-list-item'
   checked: boolean
   children: Descendant[]
+  lineNumber?: number
 }
 
 export type EditableVoidElement = {
   type: 'editable-void'
   children: Descendant[]
+  lineNumber?: number
 }
 
 export type HeadingElement = {
   type: 'heading'
   align?: string
   children: Descendant[]
+  lineNumber?: number
 }
 
 export type HeadingTwoElement = {
   type: 'heading-two'
   align?: string
   children: Descendant[]
+  lineNumber?: number
 }
 
 export type ImageElement = {
   type: 'image'
   url: string
   children: Descendant[]
+  lineNumber?: number
 }
 
-export type LinkElement = { type: 'link', url: string, children: Descendant[] }
+export type LinkElement = { type: 'link', url: string, children: Descendant[], lineNumber?: number }
 
-export type ButtonElement = { type: 'button', children: Descendant[] }
+export type ButtonElement = { type: 'button', children: Descendant[], lineNumber?: number }
 
-export type BadgeElement = { type: 'badge', children: Descendant[] }
+export type BadgeElement = { type: 'badge', children: Descendant[], lineNumber?: number }
 
-export type ListItemElement = { type: 'list-item', children: Descendant[] }
+export type ListItemElement = { type: 'list-item', children: Descendant[], lineNumber?: number }
 
 export type MentionElement = {
   type: 'mention'
   character: string
   children: CustomText[]
+  lineNumber?: number
 }
 
 export type ParagraphElement = {
   type: 'paragraph'
   align?: string
   children: Descendant[]
+  lineNumber?: number
 }
 
-export type TableElement = { type: 'table', children: TableRow[] }
+export type TableElement = { type: 'table', children: TableRow[], lineNumber?: number }
 
-export type TableCellElement = { type: 'table-cell', children: CustomText[] }
+export type TableCellElement = { type: 'table-cell', children: CustomText[], lineNumber?: number }
 
-export type TableRowElement = { type: 'table-row', children: TableCell[] }
+export type TableRowElement = { type: 'table-row', children: TableCell[], lineNumber?: number }
 
-export type TitleElement = { type: 'title', children: Descendant[] }
+export type TitleElement = { type: 'title', children: Descendant[], lineNumber?: number }
 
-export type VideoElement = { type: 'video', url: string, children: EmptyText[] }
+export type VideoElement = { type: 'video', url: string, children: EmptyText[], lineNumber?: number }
 
 export type CodeBlockElement = {
   type: 'code-block'
   language: string
   children: Descendant[]
+  lineNumber?: number
 }
 
 export type CodeLineElement = {
   type: 'code-line'
   children: Descendant[]
+  lineNumber?: number
 }
 
 type CustomElement =
@@ -106,7 +117,7 @@ type CustomElement =
   | VideoElement
   | CodeBlockElement
   | CodeLineElement
-  | { type: null, children: CustomText[] }
+  | { type: null, children: CustomText[], lineNumber?: number }
   | {
     type: string
     align?: string

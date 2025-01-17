@@ -1,21 +1,25 @@
 .notebook {
   border: none;
   padding: none;
+  display: block;
+  position: relative;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-content: center;
+  width: 100%;
+  height: 100%;
 
-  .editable {
-    padding: 10px 16px;
-    border: none;
-
-    [data-slate-node='element'] {
-      margin: 5px;
-      padding: 5px 2px;
-      font-size: 15px;
-      font-weight: normal;
-      font-family: inherit;
+  .slate {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    .editable {
+      padding: 10px 10px;
+      border: none;
     }
-  }
 
-  .active-line {
-    background-color: $editArea-activeLine-bcc;
+    .active-line {
+      background-color: $editArea-activeLine-bcc;
+    }
   }
 }

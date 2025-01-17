@@ -1,0 +1,39 @@
+.note-menu-bar {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: inherit;
+  height: 39px;
+  position: sticky;
+  z-index: 99;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #d8d8d8;
+  background-color: #e5e5e5;
+  nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .last-synced {
+    font-size: 12px;
+  }
+  &-button {
+    width: $Scratchpad-menu-bar-button-width;
+    height: $Scratchpad-menu-bar-button-height;
+    border: none;
+    border-collapse: collapse;
+    padding: 0px 12px;
+    font-size: 17px;
+    color: #666666;
+    background-color: #e5e5e5;
+    text-align: center;
+    cursor: pointer;
+    &:hover {
+      background-color: #d8d8d8;
+      color: #404040;
+    }
+  }
+}

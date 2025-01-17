@@ -9,3 +9,7 @@ export type HeaderType = {
   icon: React.ReactNode
   label: string
 }
+
+export type NoteMenuBarProps = {
+  isNote: boolean
+}

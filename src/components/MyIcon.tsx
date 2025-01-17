@@ -2,7 +2,7 @@ import type { MyIcon } from '@/types/ToolBar'
 import type { GetProps } from 'antd'
 import Icon from '@ant-design/icons'
 import { useContext } from 'react'
-import { activeContext } from '../ToolBar'
+import { activeContext } from './ToolBar'
 
 type CustomIconComponentProps = GetProps<typeof Icon> & {
   active?: boolean

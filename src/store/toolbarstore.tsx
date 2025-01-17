@@ -9,13 +9,15 @@ const toolBarStore = createSlice({
     },
   },
   reducers: {
+    getPosition(state) {
+      state.position = JSON.parse(localStorage.getItem('position') as string) || state.position
+    },
     setPosition(state, action) {
       state.position = action.payload
+      localStorage.setItem('position', JSON.stringify(state.position))
     },
   },
 })
 
 export const toolBarReducer = toolBarStore.reducer
-const { setPosition } = toolBarStore.actions
-
-export { setPosition }
+export const { setPosition, getPosition } = toolBarStore.actions
