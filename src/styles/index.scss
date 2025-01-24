@@ -1,7 +1,8 @@
 @import 'variables';
 @import 'common';
-@import 'editarea';
+@import './defaulteditor';
 @import 'layout';
 @import 'toolbar';
 @import 'element';
 @import 'notemenubar';
+@import './previeweditor';

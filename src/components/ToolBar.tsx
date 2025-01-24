@@ -1,15 +1,17 @@
 import type { RootState } from '@/store'
-import type { BaseProps, TextAlginType } from '@/types/slate'
-import type { ButtonType } from '@/types/ToolBar'
+import type { ButtonType } from '@/types/components'
+import type { BaseProps, CustomEditor, TextAlginType } from '@/types/slate'
 import type { PropsWithChildren, Ref } from 'react'
+import activeContext from '@/context/mycontext'
 import { getPosition, setPosition } from '@/store/toolbarstore'
-import { isBlockActive, isMarkActive, TEXT_ALGIN_TYPES, toggleBlock, toggleMark } from '@/utils/editorFunctions'
+import { CodeBlockType, isBlockActive, isMarkActive, TEXT_ALGIN_TYPES, toggleBlock, toggleCodeBlock, toggleMark } from '@/utils/editorFunctions'
 import { AlignCenterOutlined, AlignLeftOutlined, AlignRightOutlined, BoldOutlined, CodeOutlined, EditFilled, FullscreenExitOutlined, ItalicOutlined, OrderedListOutlined, UnderlineOutlined, UnorderedListOutlined } from '@ant-design/icons'
 import classnames from 'classnames'
 import _ from 'lodash'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useSlate } from 'slate-react'
+import { Element, Transforms } from 'slate'
+import { useSlate, useSlateStatic } from 'slate-react'
 import { AlignJustifyIcon, HeadingOneIcon, HeadingTwoIcon, QuoteIcon } from './MyIcon'
 
 const Button = React.forwardRef<HTMLSpanElement, PropsWithChildren<{
@@ -50,7 +52,7 @@ const MarkButton: ButtonType = ({ format, icon }) => {
 }
 
 // BlockButton组件
-export const activeContext = React.createContext<boolean>(false)
+
 const BlockButton: ButtonType = ({ format, icon }) => {
   const editor = useSlate()
   const isActive = isBlockActive(
@@ -73,6 +75,30 @@ const BlockButton: ButtonType = ({ format, icon }) => {
   )
 }
 
+// CodeButton组件
+const CodeBlockButton: ButtonType = ({ format, icon }) => {
+  const editor = useSlate()
+  const isActive = isBlockActive(
+    editor,
+    format,
+    TEXT_ALGIN_TYPES.includes(format as TextAlginType) ? 'align' : 'type',
+  )
+  return (
+    <Button
+      active={isActive}
+      onClick={(event: React.MouseEvent<HTMLSpanElement>) => {
+        console.log(isActive)
+        event.preventDefault()
+        toggleCodeBlock(editor, isActive)
+      }}
+    >
+      <activeContext.Provider value={isActive}>
+        {icon}
+      </activeContext.Provider>
+    </Button>
+  )
+}
+
 const ToolBar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const position = useSelector((state: RootState) => state.toolbar.position)
@@ -83,11 +109,20 @@ const ToolBar = () => {
   const toolBar = toolBarRef.current
   const layoutContent = document.querySelector('.ant-layout-content')
   const currentWindowHeight = window.innerHeight
+  const editor = useSlate()
+  const { selection } = editor
 
   // const editorRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
     dispatch(getPosition())
   }, [])
+
+  // 监视selection自动展开
+  useEffect(() => {
+    if (selection) {
+      setIsOpen(true)
+    }
+  }, [selection])
 
   const toggleToolBar = () => {
     setIsOpen(!isOpen)
@@ -121,7 +156,6 @@ const ToolBar = () => {
     const toolBar = toolBarRef.current
     const editor = toolBar?.nextElementSibling as HTMLElement | null
     const layoutContent = document.querySelector('.ant-layout-content')
-
     if (!toolBar || !editor || !layoutContent)
       return
 
@@ -176,7 +210,7 @@ const ToolBar = () => {
         <MarkButton format="bold" icon={<BoldOutlined />} />
         <MarkButton format="italic" icon={<ItalicOutlined />} />
         <MarkButton format="underline" icon={<UnderlineOutlined />} />
-        <MarkButton format="code" icon={<CodeOutlined />} />
+        <CodeBlockButton format="code_block" icon={<CodeOutlined />} />
         <BlockButton format="heading-one" icon={<HeadingOneIcon />} />
         <BlockButton format="heading-two" icon={<HeadingTwoIcon />} />
         <BlockButton format="block-quote" icon={<QuoteIcon />} />

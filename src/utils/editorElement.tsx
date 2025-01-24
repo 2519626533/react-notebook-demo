@@ -1,10 +1,12 @@
 import type { CustomText } from '@/types/slate'
-import type { RenderElementProps, RenderLeafProps } from 'slate-react'
+import { Transforms } from 'slate'
+import { ReactEditor, type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
 
 // Element
 const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element }) => {
   const { align = 'left' } = element as { align?: 'left' | 'right' | 'center' | 'justify' }
   const style: React.CSSProperties = { textAlign: align }
+  const editor = useSlate()
 
   const lineNumber = element.lineNumber || ''
   return (
@@ -64,6 +66,27 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
                   {children}
                 </ol>
               )
+            )
+          case 'code_block':
+          {
+            // const setLanguage = (language: string) => {
+            //   const path = ReactEditor.findPath(editor, element)
+            //   Transforms.setNodes(editor, { language }, { at: path })
+            // }
+            return (
+              <p
+                {...attributes}
+                spellCheck={false}
+              >
+                {children}
+              </p>
+            )
+          }
+          case 'code-line':
+            return (
+              <div {...attributes} style={{ position: 'relative' }}>
+                {children}
+              </div>
             )
           default:
             return (

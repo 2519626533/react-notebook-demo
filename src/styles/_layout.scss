@@ -82,3 +82,12 @@
     background-color: #2d2d2d;
   }
 }
+.layout-content {
+  display: flex;
+  .Scratchpad {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+}

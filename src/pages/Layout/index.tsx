@@ -1,4 +1,4 @@
-import type { MenuItems } from '@/types/Layout'
+import type { MenuItems } from '@/types/layout'
 import type { MenuInfo } from 'rc-menu/es/interface'
 import { DeleteOutlined, FormOutlined, PlusCircleTwoTone, ReconciliationOutlined, StarOutlined } from '@ant-design/icons'
 import { Layout, Menu, Tooltip } from 'antd'
@@ -65,7 +65,7 @@ const LayoutPage = () => {
         />
       </Sider>
       <Layout>
-        <Content style={{ margin: '0px' }}>
+        <Content style={{ margin: '0px' }} className="layout-content">
           <Outlet></Outlet>
         </Content>
       </Layout>

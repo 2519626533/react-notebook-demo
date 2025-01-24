@@ -1,8 +1,9 @@
 import type { CustomEditor, CustomElement, CustomFormat, CustomText, ListType, MarkType, TextAlginType } from '@/types/slate'
-import type { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { Leaf, MyElement } from '@/utils/editorElement'
+import isHotkey from 'is-hotkey'
 import { useCallback } from 'react'
 import { Editor, Element, Element as SlateElement, Transforms } from 'slate'
+import { type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -25,6 +26,18 @@ const useRenderLeaf = () => {
   }, [])
 }
 
+// 装饰格式函数
+export const CodeBlockType = 'code_block'
+const useDecorate = (editor: CustomEditor) => {
+  return useCallback(([node, path]: [Element, number[]]) => {
+    if (Element.isElement(node) && node.type === CodeBlockType) {
+      const ranges = editor.nodeToDecorations.get(node) || []
+      return ranges
+    }
+    return []
+  }, [editor.nodeToDecorations])
+}
+
 // ------------------------------------------------------------------------------------------------------------------------------------
 /*
     普通函数
@@ -33,57 +46,13 @@ const useRenderLeaf = () => {
 const TEXT_ALGIN_TYPES = ['left', 'center', 'right', 'justify'] as const
 const LIST_TYPES = ['numbered-list', 'bulleted-list'] as const
 // 定义我们自己的自定义助手集
-const Custom = {
-  isBoldMarkActive(editor: CustomEditor) {
-    const marks = Editor.marks(editor) as CustomText | null
-    return marks ? marks.bold === true : false
-  },
-  isCodeBlockActive(editor: CustomEditor) {
-    const [match] = Editor.nodes(editor, {
-      match: n => Element.isElement(n) && n.type === 'code',
-    })
-    return !!match
-  },
-  toggleBoldMark(editor: CustomEditor) {
-    const isActive = Custom.isBoldMarkActive(editor)
-    if (isActive) {
-      Editor.removeMark(editor, 'bold')
-    } else {
-      Editor.addMark(editor, 'bold', true)
-    }
-  },
-  toggleCodeBlock(editor: CustomEditor) {
-    const isActive = Custom.isCodeBlockActive(editor)
-    Transforms.setNodes(
-      editor,
-      { type: isActive ? null : 'code' },
-      {
-        match: n => Element.isElement(n) && Editor.isBlock(editor, n),
-      },
-    )
-  },
-}
 
 // 处理指令函数
 const useOnKeyDown = (editor: CustomEditor) => {
   return useCallback((e: React.KeyboardEvent) => {
-    if (!e.ctrlKey) {
-      return
-    }
-    switch (e.key) {
-    // 当按下'`'时，切换为代码段
-      case '`': {
-        e.preventDefault()
-        // 判断现在所选的text段是否是code段
-        Custom.toggleCodeBlock(editor)
-        break
-      }
-      // 当按下‘B’时，将选中的text段加粗
-      case 'b': {
-        e.preventDefault()
-        Custom.toggleBoldMark(editor)
-        break
-      }
+    if (isHotkey('tab', e)) {
+      e.preventDefault()
+      Editor.insertText(editor, '    ')
     }
   }, [editor])
 }
@@ -159,13 +128,45 @@ const toggleBlock = (editor: CustomEditor, format: CustomFormat) => {
   }
 }
 
+// 用于切换codeblock样式
+const toggleCodeBlock = (editor: CustomEditor, isActive: boolean) => {
+  if (isActive) {
+    Transforms.unwrapNodes(editor, {
+      match: n => Element.isElement(n) && n.type === CodeBlockType,
+      split: true,
+    })
+    Transforms.setNodes(
+      editor,
+      { type: 'paragraph' },
+      { match: n => Element.isElement(n) && n.type === 'code-line' },
+    )
+  } else {
+    Transforms.wrapNodes(
+      editor,
+      { type: CodeBlockType, language: 'tsx', children: [{ text: '' }] },
+      {
+        match: n => Element.isElement(n) && n.type === 'paragraph',
+        split: true,
+      },
+    )
+
+    Transforms.setNodes(
+      editor,
+      { type: 'code-line' },
+      { match: n => Element.isElement(n) && n.type === 'paragraph' },
+    )
+  }
+}
+
 export {
   isBlockActive,
   isMarkActive,
   LIST_TYPES,
   TEXT_ALGIN_TYPES,
   toggleBlock,
+  toggleCodeBlock,
   toggleMark,
+  useDecorate,
   useOnKeyDown,
   useRenderElement,
   useRenderLeaf,

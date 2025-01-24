@@ -1,9 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
+import { noteReducer } from './note'
+import { settingReducer } from './setting'
 import { toolBarReducer } from './toolbarstore'
 
 const store = configureStore({
   reducer: {
     toolbar: toolBarReducer,
+    setting: settingReducer,
+    note: noteReducer,
   },
 })
 

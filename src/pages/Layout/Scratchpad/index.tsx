@@ -1,9 +1,33 @@
-import EditArea from '@/components/EditArea'
+import DefaultEditor from '@/components/DefaultEditor'
+import NoteMenuBar from '@/components/NoteMenuBar'
+import PreviewEditor from '@/components/PreviewEditor'
+import { getSettings } from '@/store/selector'
+import { useSelector } from 'react-redux'
 
 const Scratchpad = () => {
+  /*
+  * Selectors
+ */
+  const { isPreviewMode } = useSelector(getSettings)
+
+  /*
+  * Render
+  */
+  const renderEditor = () => {
+    if (isPreviewMode) {
+      return (
+        <PreviewEditor />
+      )
+    } else {
+      return (
+        <DefaultEditor />
+      )
+    }
+  }
   return (
     <div className="Scratchpad">
-      <EditArea />
+      {renderEditor()}
+      <NoteMenuBar isNote={false} />
     </div>
   )
 }

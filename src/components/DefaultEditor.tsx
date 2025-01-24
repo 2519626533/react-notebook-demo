@@ -1,44 +1,38 @@
 import type { CustomEditor, CustomElement } from '@/types/slate'
-import { useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorFunctions'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { setContent } from '@/store/note'
+import { getNotes } from '@/store/selector'
+import { SetNodeToDecorations } from '@/utils/decorationsFn'
+import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorFunctions'
+import { useEffect, useMemo, useRef } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { createEditor, type Descendant, type Operation, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
-import NoteMenuBar from './NoteMenuBar'
 import ToolBar from './ToolBar'
 
 // EditArea主体
-const EditArea = () => {
+const DefaultEditor = () => {
   const editRef = useRef<HTMLDivElement>(null)
+  const dispatch = useDispatch()
   // 创建Slate
-  const editor = useMemo(() => withHistory(withReact(createEditor())), [])
+  const editor = useMemo(() => {
+    const editor = withHistory(withReact(createEditor()))
+    editor.nodeToDecorations = new Map()
+    return editor
+  }, [])
 
   // 初始化数据
-  const initialValue: CustomElement[] = useMemo(() =>
-    JSON.parse(localStorage.getItem('content') as string) || [
-      {
-        type: 'paragraph',
-        children: [
-          { text: 'The Power of Small Steps\n', bold: true },
-        ],
-      },
-      {
-        type: 'paragraph',
-        children: [
-          { text: 'In life, we often dream big and set ambitious goals. However, it’s easy to feel overwhelmed by the enormity of these aspirations. The key to achieving them lies in taking small, consistent steps.\n' },
-          { text: 'Every great journey begins with a single step. Whether it’s learning a new skill, improving health, or building a career, progress is made through daily efforts. Small actions, when repeated over time, compound into significant results. For example, reading just 10 pages a day can lead to finishing dozens of books in a year. Similarly, saving a little money regularly can grow into a substantial amount over time.\n' },
-          { text: 'The beauty of small steps is that they are manageable and sustainable. They reduce the pressure of perfection and allow us to focus on the process rather than the outcome. By celebrating small wins, we stay motivated and build momentum.\n' },
-          { text: 'Remember, Rome wasn’t built in a day. Embrace the power of small steps, and you’ll find yourself closer to your dreams than you ever imagined.\n' },
-        ],
-      },
-    ], [])
-  const [value, setValue] = useState(initialValue)
+  const { content } = useSelector(getNotes)
+  const value: Descendant[] = content
 
   // 渲染块级格式
   const renderElement = useRenderElement()
 
   // 渲染字符集格式
   const renderLeaf = useRenderLeaf()
+
+  // 渲染装饰格式
+  const decorate = useDecorate(editor)
 
   // 处理指令函数
   const onKeyDown = useOnKeyDown(editor)
@@ -61,20 +55,13 @@ const EditArea = () => {
     getLineNumbers()
   }, [editor])
 
-  // 序列化
-  const serialize = (value: Descendant[]) => {
-    return (
-      JSON.stringify(value)
-    )
-  }
-
   const editUpdate = (value: Descendant[], editor: CustomEditor) => {
     const isAstChange = editor.operations.some(
       (op: Operation) => op.type !== 'set_selection',
     )
     if (isAstChange) {
       getLineNumbers()
-      localStorage.setItem('content', serialize(value))
+      dispatch(setContent(value))
     }
   }
 
@@ -103,10 +90,12 @@ const EditArea = () => {
           initialValue={value}
           onChange={value => editUpdate(value, editor)}
         >
-          <ToolBar></ToolBar>
+          <ToolBar />
+          {/* <SetNodeToDecorations /> */}
           <Editable
             ref={editRef}
             style={{ outline: 'none' }}
+            decorate={decorate}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             onKeyDown={onKeyDown}
@@ -116,10 +105,9 @@ const EditArea = () => {
           />
         </Slate>
       </div>
-      <NoteMenuBar isNote={false} />
     </div>
 
   )
 }
 
-export default EditArea
+export default DefaultEditor

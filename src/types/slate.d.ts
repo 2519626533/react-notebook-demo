@@ -84,7 +84,7 @@ export type TitleElement = { type: 'title', children: Descendant[], lineNumber?:
 export type VideoElement = { type: 'video', url: string, children: EmptyText[], lineNumber?: number }
 
 export type CodeBlockElement = {
-  type: 'code-block'
+  type: 'code_block'
   language: string
   children: Descendant[]
   lineNumber?: number
@@ -141,12 +141,14 @@ type ListType = typeof LIST_TYPES[number]
 type TextAlginType = typeof TEXT_ALGIN_TYPES[number]
 type BlockType = | 'paragraph' | 'heading-one' | 'heading-two' | 'block-quote' | 'list-item'
 type MarkType = keyof Omit<CustomText, 'text'>
+type CodeType = 'code_block' | 'code-line'
 
 export type CustomFormat =
   | MarkType
   | ListType
   | TextAlginType
   | BlockType
+  | CodeType
 
 export type CustomEditor = BaseEditor &
   ReactEditor &
