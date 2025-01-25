@@ -3,9 +3,10 @@ import { setContent } from '@/store/note'
 import { getNotes } from '@/store/selector'
 import { SetNodeToDecorations } from '@/utils/decorationsFn'
 import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorFunctions'
-import { useEffect, useMemo, useRef } from 'react'
+import Prism from 'prismjs'
+import { type ClipboardEventHandler, useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { createEditor, type Descendant, type Operation, Transforms } from 'slate'
+import { createEditor, type Descendant, Editor, Node, type Operation, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 import ToolBar from './ToolBar'
@@ -14,6 +15,7 @@ import ToolBar from './ToolBar'
 const DefaultEditor = () => {
   const editRef = useRef<HTMLDivElement>(null)
   const dispatch = useDispatch()
+  const BlockType = ['paragraph', 'heading-one', 'heading-two', 'block-quote', 'list-item', 'code_block']
   // 创建Slate
   const editor = useMemo(() => {
     const editor = withHistory(withReact(createEditor()))
@@ -38,15 +40,37 @@ const DefaultEditor = () => {
   const onKeyDown = useOnKeyDown(editor)
 
   const getLineNumbers = () => {
+    let lineNumber = 1
+
+    const processNode = (node: CustomElement, path: number[]) => {
+      if (node.type === 'code_block' || node.type === 'bulleted-list' || node.type === 'numbered-list') {
+        node.children.forEach((child, childIndex) => {
+          const childPath = [...path, childIndex]
+          Transforms.setNodes(
+            editor,
+            { lineNumber: lineNumber++ },
+            {
+              at: childPath,
+              match: n => n === child,
+            },
+          )
+        })
+      } else {
+        Transforms.setNodes(
+          editor,
+          {
+            lineNumber: lineNumber++,
+          },
+          {
+            at: path,
+            match: n => n === node && BlockType.includes(n.type),
+          },
+        )
+      }
+    }
+
     editor.children.forEach((node: CustomElement, index: number) => {
-      Transforms.setNodes(
-        editor,
-        { lineNumber: index + 1 },
-        {
-          at: [index],
-          match: n => n === node,
-        },
-      )
+      processNode(node, [index])
     })
   }
 
@@ -54,6 +78,10 @@ const DefaultEditor = () => {
     // 初始计算
     getLineNumbers()
   }, [editor])
+
+  useEffect(() => {
+    Prism.highlightAll()
+  }, [value])
 
   const editUpdate = (value: Descendant[], editor: CustomEditor) => {
     const isAstChange = editor.operations.some(
@@ -65,6 +93,7 @@ const DefaultEditor = () => {
     }
   }
 
+  // 高亮所选行
   const activeSelection = (event: React.MouseEvent<HTMLDivElement>) => {
     const edit = editRef.current
     if (!edit)
@@ -82,6 +111,21 @@ const DefaultEditor = () => {
     }
   }
 
+  //  自定义复制事件
+  const handleCopy = (event: React.ClipboardEvent<HTMLDivElement>) => {
+    const { selection } = editor
+    if (!selection)
+      return
+
+    const fragment = Editor.fragment(editor, selection)
+    const selectedText = fragment.map(node => Node.string(node)).join('\n')
+
+    const filteredText = selectedText.replace(/^\d+\s+/gm, '')
+
+    event.clipboardData?.setData('text/plain', filteredText)
+    event.preventDefault()
+  }
+
   return (
     <div className="notebook">
       <div className="slate">
@@ -91,7 +135,7 @@ const DefaultEditor = () => {
           onChange={value => editUpdate(value, editor)}
         >
           <ToolBar />
-          {/* <SetNodeToDecorations /> */}
+          <SetNodeToDecorations />
           <Editable
             ref={editRef}
             style={{ outline: 'none' }}
@@ -100,6 +144,7 @@ const DefaultEditor = () => {
             renderLeaf={renderLeaf}
             onKeyDown={onKeyDown}
             onMouseDown={activeSelection}
+            onCopy={handleCopy}
             className="editable"
             spellCheck={false}
           />

@@ -43,14 +43,15 @@ export const normalizeTokens = (
   const acc = [currentLine]
 
   while (stackIndex > -1) {
-    i = tokenArrIndexStack[stackIndex]++
-    while (i < tokenArrSizeStack[stackIndex]) {
+    while (tokenArrIndexStack[stackIndex] < tokenArrSizeStack[stackIndex]) {
       let content
       let types = typeArrStack[stackIndex]
       i = tokenArrIndexStack[stackIndex]++
 
       const tokenArr = tokenArrStack[stackIndex]
       const token = tokenArr[i]
+
+      // console.log(token)
 
       if (typeof token === 'string') {
         types = stackIndex > 0 ? types : ['plain']

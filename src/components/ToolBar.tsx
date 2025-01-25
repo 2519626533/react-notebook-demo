@@ -87,7 +87,6 @@ const CodeBlockButton: ButtonType = ({ format, icon }) => {
     <Button
       active={isActive}
       onClick={(event: React.MouseEvent<HTMLSpanElement>) => {
-        console.log(isActive)
         event.preventDefault()
         toggleCodeBlock(editor, isActive)
       }}

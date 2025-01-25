@@ -139,7 +139,7 @@ export type EmptyText = {
 
 type ListType = typeof LIST_TYPES[number]
 type TextAlginType = typeof TEXT_ALGIN_TYPES[number]
-type BlockType = | 'paragraph' | 'heading-one' | 'heading-two' | 'block-quote' | 'list-item'
+type BlockType = | 'paragraph' | 'heading-one' | 'heading-two' | 'block-quote' | 'list-item' | 'code_block'
 type MarkType = keyof Omit<CustomText, 'text'>
 type CodeType = 'code_block' | 'code-line'
 

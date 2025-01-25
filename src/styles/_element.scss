@@ -22,6 +22,10 @@
       caret-color: transparent;
     }
   }
+  h1[data-slate-node='element'] {
+    cursor: auto;
+  }
+  div[data-slate-node='element'],
   p[data-slate-node='element'] {
     width: 100%;
     margin: 0px;
@@ -30,5 +34,30 @@
     font-weight: normal;
     font-family: inherit;
     cursor: auto;
+  }
+  ol,
+  ul {
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    list-style-position: inside;
+    li {
+      padding: 5px 0px 5px 40px;
+      width: 100%;
+      font-size: 15px;
+      cursor: auto;
+      &::marker {
+        text-align: right !important;
+      }
+    }
+  }
+  pre {
+    margin: 0;
+    flex: 1;
+    code {
+      .element-container {
+        height: 30px;
+      }
+    }
   }
 }

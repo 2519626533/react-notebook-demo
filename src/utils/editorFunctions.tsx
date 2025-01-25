@@ -31,7 +31,13 @@ export const CodeBlockType = 'code_block'
 const useDecorate = (editor: CustomEditor) => {
   return useCallback(([node, path]: [Element, number[]]) => {
     if (Element.isElement(node) && node.type === CodeBlockType) {
-      const ranges = editor.nodeToDecorations.get(node) || []
+      const ranges: Range[] = []
+      for (const child of node.children) {
+        if (Element.isElement(child) && child.type === 'code-line') {
+          const childRanges = editor.nodeToDecorations.get(child)
+          ranges.push(...childRanges)
+        }
+      }
       return ranges
     }
     return []
@@ -143,7 +149,7 @@ const toggleCodeBlock = (editor: CustomEditor, isActive: boolean) => {
   } else {
     Transforms.wrapNodes(
       editor,
-      { type: CodeBlockType, language: 'tsx', children: [{ text: '' }] },
+      { type: CodeBlockType, language: 'jsx', children: [{ text: '' }] },
       {
         match: n => Element.isElement(n) && n.type === 'paragraph',
         split: true,

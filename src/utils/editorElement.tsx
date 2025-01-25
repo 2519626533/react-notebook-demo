@@ -9,32 +9,20 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
   const editor = useSlate()
 
   const lineNumber = element.lineNumber || ''
+  const isEmpty = (lineNumber === '')
   return (
     <div className="element-container">
       {/* 行号容器 */}
-      <div className="line-wrapper" contentEditable={false}>
-        <div className="line-number">
-          {lineNumber}
+      {!isEmpty && (
+        <div className="line-wrapper" contentEditable={false}>
+          <div className="line-number">
+            {lineNumber}
+          </div>
         </div>
-      </div>
+      )}
       {/* 内容 */}
       {(() => {
         switch (element.type) {
-          case 'block-quote':
-            return (
-              <blockquote style={style} {...attributes}>
-                {children}
-              </blockquote>
-            )
-
-          case 'bulleted-list':
-            return (
-              (
-                <ul style={style} {...attributes}>
-                  {children}
-                </ul>
-              )
-            )
           case 'heading-one':
             return (
               (
@@ -51,12 +39,18 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
                 </h2>
               )
             )
-          case 'list-item':
+          case 'block-quote':
+            return (
+              <blockquote style={style} {...attributes}>
+                {children}
+              </blockquote>
+            )
+          case 'bulleted-list':
             return (
               (
-                <li style={style} {...attributes}>
+                <ul style={style} {...attributes}>
                   {children}
-                </li>
+                </ul>
               )
             )
           case 'numbered-list':
@@ -65,6 +59,15 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
                 <ol style={style} {...attributes}>
                   {children}
                 </ol>
+
+              )
+            )
+          case 'list-item':
+            return (
+              (
+                <li style={style} {...attributes}>
+                  {children}
+                </li>
               )
             )
           case 'code_block':
@@ -74,12 +77,14 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
             //   Transforms.setNodes(editor, { language }, { at: path })
             // }
             return (
-              <p
-                {...attributes}
-                spellCheck={false}
-              >
-                {children}
-              </p>
+              <pre {...attributes}>
+                <code
+                  spellCheck={false}
+                  style={{ padding: '0' }}
+                >
+                  {children}
+                </code>
+              </pre>
             )
           }
           case 'code-line':
@@ -91,9 +96,9 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
           default:
             return (
               (
-                <p style={style} {...attributes}>
+                <div style={style} {...attributes}>
                   {children}
-                </p>
+                </div>
               )
             )
         }
@@ -104,6 +109,8 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
 
 // 定义一个 React 组件来渲染带有粗体文本的叶子
 const Leaf: React.FC<RenderLeafProps & { leaf: CustomText }> = ({ attributes, children, leaf }) => {
+  const { text, ...rest } = leaf
+  console.log(leaf)
   if (leaf.bold) {
     children = <strong>{children}</strong>
   }
@@ -120,7 +127,7 @@ const Leaf: React.FC<RenderLeafProps & { leaf: CustomText }> = ({ attributes, ch
     children = <u>{children}</u>
   }
   return (
-    <span {...attributes}>{children}</span>
+    <span {...attributes} className={Object.keys(rest).join(' ')}>{children}</span>
   )
 }
 

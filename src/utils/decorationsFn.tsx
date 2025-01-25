@@ -13,21 +13,16 @@ import 'prismjs/components/prism-python'
 import 'prismjs/components/prism-php'
 import 'prismjs/components/prism-sql'
 import 'prismjs/components/prism-java'
+import 'prismjs/themes/prism.css'
 
 // 合并map函数
 const mergeMaps = <K, V>(...maps: Map<K, V>[]) => {
   const map = new Map<K, V>()
-
   for (const m of maps) {
-    for (const [key, value] of m) {
-      if (!map.has(key)) {
-        map.set(key, [...value])
-      } else {
-        map.get(key)!.push(...value)
-      }
+    for (const item of m) {
+      map.set(...item)
     }
   }
-
   return map
 }
 
@@ -41,8 +36,9 @@ const getChildNodeToDecorations = ([
   const text = block.children.map(line => Node.string(line)).join('\n')
   const language = block.language || 'plaintext'
   const tokens = Prism.tokenize(text, Prism.languages[language])
-  console.log(tokens)
+
   const normalizedTokens = normalizeTokens(tokens)
+  // console.log(normalizedTokens)
   const blockChildren = block.children as Element[]
 
   for (let index = 0; index < normalizedTokens.length; index++) {
@@ -74,6 +70,7 @@ const getChildNodeToDecorations = ([
       start = end
     }
   }
+  // console.log(nodeToDecorations)
   return nodeToDecorations
 }
 
@@ -93,7 +90,7 @@ const SetNodeToDecorations = () => {
   )
 
   editor.nodeToDecorations = nodeToDecorations
-  console.log('nodeToDecorations:', nodeToDecorations)
+  // console.log('nodeToDecorations:', nodeToDecorations)
   return null
 }
 
