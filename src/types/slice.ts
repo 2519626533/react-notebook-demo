@@ -1,15 +1,14 @@
-import type { Descendant } from 'slate'
 import type { CustomElement } from './slate'
 
 export interface RootState {
   setting: SettingState
-  note: NoteSate
+  note: NoteState
 }
 
 export interface SettingState {
   isPreviewMode: boolean
 }
 
-export interface NoteSate {
+export interface NoteState {
   content: CustomElement[]
 }

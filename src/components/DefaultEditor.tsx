@@ -1,12 +1,13 @@
 import type { CustomEditor, CustomElement } from '@/types/slate'
 import { setContent } from '@/store/note'
 import { getNotes } from '@/store/selector'
+import { BlockType } from '@/types/components'
 import { SetNodeToDecorations } from '@/utils/decorationsFn'
 import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorFunctions'
 import Prism from 'prismjs'
-import { type ClipboardEventHandler, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { createEditor, type Descendant, Editor, Node, type Operation, Transforms } from 'slate'
+import { createEditor, type Descendant, Editor, Element, Node, type Operation, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 import ToolBar from './ToolBar'
@@ -15,7 +16,7 @@ import ToolBar from './ToolBar'
 const DefaultEditor = () => {
   const editRef = useRef<HTMLDivElement>(null)
   const dispatch = useDispatch()
-  const BlockType = ['paragraph', 'heading-one', 'heading-two', 'block-quote', 'list-item', 'code_block']
+
   // 创建Slate
   const editor = useMemo(() => {
     const editor = withHistory(withReact(createEditor()))
@@ -43,7 +44,7 @@ const DefaultEditor = () => {
     let lineNumber = 1
 
     const processNode = (node: CustomElement, path: number[]) => {
-      if (node.type === 'code_block' || node.type === 'bulleted-list' || node.type === 'numbered-list') {
+      if (node.type === 'code-block' || node.type === 'bulleted-list' || node.type === 'numbered-list') {
         node.children.forEach((child, childIndex) => {
           const childPath = [...path, childIndex]
           Transforms.setNodes(
@@ -118,8 +119,13 @@ const DefaultEditor = () => {
       return
 
     const fragment = Editor.fragment(editor, selection)
-    const selectedText = fragment.map(node => Node.string(node)).join('\n')
-
+    const selectedText = fragment.map((node) => {
+      if (Element.isElement(node) && BlockType.includes(node.type as string)) {
+        return node.children.map(node => Node.string(node)).join('\n')
+      }
+      return Node.string(node)
+    })
+      .join('\n')
     const filteredText = selectedText.replace(/^\d+\s+/gm, '')
 
     event.clipboardData?.setData('text/plain', filteredText)

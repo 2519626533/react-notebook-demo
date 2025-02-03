@@ -1,13 +1,13 @@
-import type { CustomText } from '@/types/slate'
+import type { CodeBlockElement, CustomText } from '@/types/slate'
+import LanguageSelector from '@/components/LanguageSelector'
 import { Transforms } from 'slate'
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
 
 // Element
 const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element }) => {
   const { align = 'left' } = element as { align?: 'left' | 'right' | 'center' | 'justify' }
-  const style: React.CSSProperties = { textAlign: align }
   const editor = useSlate()
-
+  const style: React.CSSProperties = { textAlign: align }
   const lineNumber = element.lineNumber || ''
   const isEmpty = (lineNumber === '')
   return (
@@ -59,7 +59,6 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
                 <ol style={style} {...attributes}>
                   {children}
                 </ol>
-
               )
             )
           case 'list-item':
@@ -70,19 +69,25 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
                 </li>
               )
             )
-          case 'code_block':
+          case 'code-block':
           {
-            // const setLanguage = (language: string) => {
-            //   const path = ReactEditor.findPath(editor, element)
-            //   Transforms.setNodes(editor, { language }, { at: path })
-            // }
+            const setLanguage = (language: string) => {
+              const path = ReactEditor.findPath(editor, element)
+              Transforms.setNodes(editor, { language }, { at: path })
+            }
             return (
-              <pre {...attributes}>
+              <pre
+                {...attributes}
+              >
                 <code
                   spellCheck={false}
                   style={{ padding: '0' }}
                 >
                   {children}
+                  <LanguageSelector
+                    value={(element as CodeBlockElement).language}
+                    onChange={e => setLanguage(e.target.value)}
+                  />
                 </code>
               </pre>
             )
@@ -110,7 +115,6 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
 // 定义一个 React 组件来渲染带有粗体文本的叶子
 const Leaf: React.FC<RenderLeafProps & { leaf: CustomText }> = ({ attributes, children, leaf }) => {
   const { text, ...rest } = leaf
-  console.log(leaf)
   if (leaf.bold) {
     children = <strong>{children}</strong>
   }

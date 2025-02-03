@@ -1,4 +1,4 @@
-import type { CustomFormat } from './slate'
+import type { CustomFormat, MyNodeTypes } from './slate'
 
 export type ButtonType = (props: {
   format: CustomFormat
@@ -22,3 +22,29 @@ export type ToolBarPosition = {
   x: number
   y: number
 }
+
+export const BlockType = ['paragraph', 'heading-one', 'heading-two', 'block-quote', 'list-item', 'code-block', 'bulleted-list', 'numbered-list']
+
+export const myRemarkSlateNodeTypes: MyNodeTypes = {
+  paragraph: 'paragraph',
+  block_quote: 'block-quote',
+  code_block: 'code-block',
+  link: 'link',
+  ul_list: 'bulleted-list',
+  ol_list: 'numbered-list',
+  listItem: 'list-item',
+  heading: {
+    1: 'heading-one',
+    2: 'heading-two',
+    3: 'heading-three',
+    4: 'heading-four',
+    5: 'heading-five',
+    6: 'heading-six',
+  },
+  emphasis_mark: 'italic',
+  strong_mark: 'bold',
+  delete_mark: 'strikeThrough',
+  inline_code_mark: 'code',
+  thematic_break: 'thematic_break',
+  image: 'image',
+} as unknown as MyNodeTypes

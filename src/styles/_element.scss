@@ -52,11 +52,23 @@
     }
   }
   pre {
+    position: relative;
     margin: 0;
     flex: 1;
     code {
       .element-container {
         height: 30px;
+      }
+      .language-selector {
+        border-radius: 5px;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        z-index: 1;
+        opacity: 0.5;
+        &:hover {
+          opacity: 1;
+        }
       }
     }
   }

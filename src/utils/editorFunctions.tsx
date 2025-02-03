@@ -1,9 +1,9 @@
-import type { CustomEditor, CustomElement, CustomFormat, CustomText, ListType, MarkType, TextAlginType } from '@/types/slate'
+import type { CustomEditor, CustomFormat, CustomText, ListType, MarkType, TextAlginType } from '@/types/slate'
+import type { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { Leaf, MyElement } from '@/utils/editorElement'
 import isHotkey from 'is-hotkey'
 import { useCallback } from 'react'
 import { Editor, Element, Element as SlateElement, Transforms } from 'slate'
-import { type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -27,7 +27,7 @@ const useRenderLeaf = () => {
 }
 
 // 装饰格式函数
-export const CodeBlockType = 'code_block'
+export const CodeBlockType = 'code-block'
 const useDecorate = (editor: CustomEditor) => {
   return useCallback(([node, path]: [Element, number[]]) => {
     if (Element.isElement(node) && node.type === CodeBlockType) {
@@ -155,7 +155,6 @@ const toggleCodeBlock = (editor: CustomEditor, isActive: boolean) => {
         split: true,
       },
     )
-
     Transforms.setNodes(
       editor,
       { type: 'code-line' },

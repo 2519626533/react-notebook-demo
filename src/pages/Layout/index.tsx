@@ -56,7 +56,6 @@ const LayoutPage = () => {
 
         </div>
         <Menu
-          style={{}}
           className="Layout-Sider-Menu"
           selectedKeys={[selectedKey]}
           mode="inline"
@@ -64,8 +63,8 @@ const LayoutPage = () => {
           onSelect={onSelect}
         />
       </Sider>
-      <Layout>
-        <Content style={{ margin: '0px' }} className="layout-content">
+      <Layout className="layout">
+        <Content className="layout-content">
           <Outlet></Outlet>
         </Content>
       </Layout>
