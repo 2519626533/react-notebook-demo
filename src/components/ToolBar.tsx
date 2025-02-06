@@ -51,7 +51,6 @@ const MarkButton: ButtonType = ({ format, icon }) => {
 }
 
 // BlockButton组件
-
 const BlockButton: ButtonType = ({ format, icon }) => {
   const editor = useSlate()
   const isActive = isBlockActive(
@@ -157,6 +156,10 @@ const ToolBar = () => {
     const layoutContent = document.querySelector('.ant-layout-content')
     if (!toolBar || !editor || !layoutContent)
       return
+    document.onselectstart
+      = function () { return false }
+    document.ondragstart
+      = function () { return false }
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       let newX = (moveEvent.clientX - startX) + position.x
@@ -186,6 +189,8 @@ const ToolBar = () => {
       document.removeEventListener('mouseup', handleMouseUp)
       setIsDragging(false)
       editor.style.pointerEvents = ''
+      document.onselectstart = null
+      document.ondragstart = null
     }
 
     document.addEventListener('mousemove', handleMouseMove)

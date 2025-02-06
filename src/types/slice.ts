@@ -7,6 +7,7 @@ export interface RootState {
 
 export interface SettingState {
   isPreviewMode: boolean
+  darkTheme: boolean
 }
 
 export interface NoteState {

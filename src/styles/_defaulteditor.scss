@@ -16,10 +16,21 @@
     .editable {
       padding: 10px 10px;
       border: none;
+      outline: auto;
+      z-index: 2;
+      isolation: isolate;
     }
-
-    .active-line {
-      background-color: $editArea-activeLine-bcc;
+    .editable[data-theme='light'] {
+      background-color: $editable-bcc-light;
+      .active-line {
+        background-color: $editArea-activeLine-bcc-light;
+      }
+    }
+    .editable[data-theme='dark'] {
+      background-color: $editable-bcc-dark;
+      .active-line {
+        background-color: $editArea-activeLine-bcc-dark;
+      }
     }
   }
 }

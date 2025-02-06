@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 export const settingInitialState: SettingState = {
   isPreviewMode: false,
+  darkTheme: false,
 }
 
 const settingStore = createSlice({
@@ -12,8 +13,11 @@ const settingStore = createSlice({
     togglePreviewMode(state) {
       state.isPreviewMode = !state.isPreviewMode
     },
+    toggleThemeMode(state) {
+      state.darkTheme = !state.darkTheme
+    },
   },
 })
 
 export const settingReducer = settingStore.reducer
-export const { togglePreviewMode } = settingStore.actions
+export const { togglePreviewMode, toggleThemeMode } = settingStore.actions

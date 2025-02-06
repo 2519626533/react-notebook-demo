@@ -1,5 +1,9 @@
 .Layout-Sider {
   background-color: #2d2d2d;
+  position: sticky;
+  top: 0;
+  left: 0;
+  height: 100vh;
   // 侧边栏收起时的样式
   &.ant-layout-sider-collapsed {
     .Layout-Sider-Header {

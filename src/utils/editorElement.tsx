@@ -1,12 +1,24 @@
 import type { CodeBlockElement, CustomText } from '@/types/slate'
 import LanguageSelector from '@/components/LanguageSelector'
+import { getSettings } from '@/store/selector'
+import { useSelector } from 'react-redux'
 import { Transforms } from 'slate'
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
+import 'prismjs/components/prism-javascript'
+import 'prismjs/components/prism-jsx'
+import 'prismjs/components/prism-typescript'
+import 'prismjs/components/prism-tsx'
+import 'prismjs/components/prism-markdown'
+import 'prismjs/components/prism-python'
+import 'prismjs/components/prism-php'
+import 'prismjs/components/prism-sql'
+import 'prismjs/components/prism-java'
 
 // Element
 const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element }) => {
   const { align = 'left' } = element as { align?: 'left' | 'right' | 'center' | 'justify' }
   const editor = useSlate()
+  const { darkTheme } = useSelector(getSettings)
   const style: React.CSSProperties = { textAlign: align }
   const lineNumber = element.lineNumber || ''
   const isEmpty = (lineNumber === '')
@@ -26,7 +38,11 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
           case 'heading-one':
             return (
               (
-                <h1 style={style} {...attributes}>
+                <h1
+                  style={style}
+                  {...attributes}
+                  data-theme={darkTheme ? 'dark' : 'light'}
+                >
                   {children}
                 </h1>
               )
@@ -34,14 +50,18 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
           case 'heading-two':
             return (
               (
-                <h2 style={style} {...attributes}>
+                <h2 style={style} {...attributes} data-theme={darkTheme ? 'dark' : 'light'}>
                   {children}
                 </h2>
               )
             )
           case 'block-quote':
             return (
-              <blockquote style={style} {...attributes}>
+              <blockquote
+                style={style}
+                {...attributes}
+                data-theme={darkTheme ? 'dark' : 'light'}
+              >
                 {children}
               </blockquote>
             )
@@ -64,7 +84,11 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
           case 'list-item':
             return (
               (
-                <li style={style} {...attributes}>
+                <li
+                  style={style}
+                  {...attributes}
+                  data-theme={darkTheme ? 'dark' : 'light'}
+                >
                   {children}
                 </li>
               )
@@ -82,6 +106,7 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
                 <code
                   spellCheck={false}
                   style={{ padding: '0' }}
+                  data-theme={darkTheme ? 'dark' : 'light'}
                 >
                   {children}
                   <LanguageSelector
@@ -101,7 +126,7 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
           default:
             return (
               (
-                <div style={style} {...attributes}>
+                <div style={style} {...attributes} data-theme={darkTheme ? 'dark' : 'light'}>
                   {children}
                 </div>
               )
@@ -131,7 +156,24 @@ const Leaf: React.FC<RenderLeafProps & { leaf: CustomText }> = ({ attributes, ch
     children = <u>{children}</u>
   }
   return (
-    <span {...attributes} className={Object.keys(rest).join(' ')}>{children}</span>
+    <span
+      {...attributes}
+      className={Object.keys(rest).join(' ')}
+      // 在渲染逻辑中处理样式叠加
+      style={{
+        ...(leaf.url && { color: '#52BE80' }),
+        ...(leaf.mdLink && {
+          textDecoration: 'underline',
+          color: '#D2B4DE',
+        }),
+        ...(leaf.uuid && {
+          fontStyle: 'italic',
+          color: '#1ABC9C',
+        }),
+      }}
+    >
+      {children}
+    </span>
   )
 }
 

@@ -1,48 +1,5 @@
 import type { CustomEditor, CustomFormat, CustomText, ListType, MarkType, TextAlginType } from '@/types/slate'
-import type { RenderElementProps, RenderLeafProps } from 'slate-react'
-import { Leaf, MyElement } from '@/utils/editorElement'
-import isHotkey from 'is-hotkey'
-import { useCallback } from 'react'
 import { Editor, Element, Element as SlateElement, Transforms } from 'slate'
-
-// ------------------------------------------------------------------------------------------------------------------------------------
-/*
-    Hooks函数
-*/
-// 块级元素渲染
-const useRenderElement = () => {
-  return useCallback((props: RenderElementProps) => {
-    return (
-      <MyElement {...props}>
-      </MyElement>
-    )
-  }, [])
-}
-
-// 字符级格式渲染
-const useRenderLeaf = () => {
-  return useCallback((props: RenderLeafProps) => {
-    return <Leaf {...props}></Leaf>
-  }, [])
-}
-
-// 装饰格式函数
-export const CodeBlockType = 'code-block'
-const useDecorate = (editor: CustomEditor) => {
-  return useCallback(([node, path]: [Element, number[]]) => {
-    if (Element.isElement(node) && node.type === CodeBlockType) {
-      const ranges: Range[] = []
-      for (const child of node.children) {
-        if (Element.isElement(child) && child.type === 'code-line') {
-          const childRanges = editor.nodeToDecorations.get(child)
-          ranges.push(...childRanges)
-        }
-      }
-      return ranges
-    }
-    return []
-  }, [editor.nodeToDecorations])
-}
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -53,18 +10,8 @@ const TEXT_ALGIN_TYPES = ['left', 'center', 'right', 'justify'] as const
 const LIST_TYPES = ['numbered-list', 'bulleted-list'] as const
 // 定义我们自己的自定义助手集
 
-// 处理指令函数
-const useOnKeyDown = (editor: CustomEditor) => {
-  return useCallback((e: React.KeyboardEvent) => {
-    if (isHotkey('tab', e)) {
-      e.preventDefault()
-      Editor.insertText(editor, '    ')
-    }
-  }, [editor])
-}
-
 // 检查当前选区是否包含指定的块级样式
-const isBlockActive = (editor: CustomEditor, format: CustomFormat, blockType: string = 'type') => {
+const isBlockActive = (editor: CustomEditor, format: CustomFormat, blockType: 'type' | 'align' = 'type') => {
   const { selection } = editor
   if (!selection)
     return false
@@ -138,7 +85,7 @@ const toggleBlock = (editor: CustomEditor, format: CustomFormat) => {
 const toggleCodeBlock = (editor: CustomEditor, isActive: boolean) => {
   if (isActive) {
     Transforms.unwrapNodes(editor, {
-      match: n => Element.isElement(n) && n.type === CodeBlockType,
+      match: n => Element.isElement(n) && n.type === 'code-block',
       split: true,
     })
     Transforms.setNodes(
@@ -149,7 +96,7 @@ const toggleCodeBlock = (editor: CustomEditor, isActive: boolean) => {
   } else {
     Transforms.wrapNodes(
       editor,
-      { type: CodeBlockType, language: 'jsx', children: [{ text: '' }] },
+      { type: 'code-block', language: 'jsx', children: [{ text: '' }] },
       {
         match: n => Element.isElement(n) && n.type === 'paragraph',
         split: true,
@@ -171,8 +118,4 @@ export {
   toggleBlock,
   toggleCodeBlock,
   toggleMark,
-  useDecorate,
-  useOnKeyDown,
-  useRenderElement,
-  useRenderLeaf,
 }

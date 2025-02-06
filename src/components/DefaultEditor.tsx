@@ -1,15 +1,15 @@
 import type { CustomEditor, CustomElement } from '@/types/slate'
 import { setContent } from '@/store/note'
-import { getNotes } from '@/store/selector'
+import { getNotes, getSettings } from '@/store/selector'
 import { BlockType } from '@/types/components'
 import { SetNodeToDecorations } from '@/utils/decorationsFn'
-import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorFunctions'
+import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorHooks'
 import Prism from 'prismjs'
 import { useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createEditor, type Descendant, Editor, Element, Node, type Operation, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
-import { Editable, Slate, withReact } from 'slate-react'
+import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
 import ToolBar from './ToolBar'
 
 // EditArea主体
@@ -40,6 +40,9 @@ const DefaultEditor = () => {
   // 处理指令函数
   const onKeyDown = useOnKeyDown(editor)
 
+  // 获取当前主题
+  const { darkTheme } = useSelector(getSettings)
+
   const getLineNumbers = () => {
     let lineNumber = 1
 
@@ -69,7 +72,6 @@ const DefaultEditor = () => {
         )
       }
     }
-
     editor.children.forEach((node: CustomElement, index: number) => {
       processNode(node, [index])
     })
@@ -80,11 +82,23 @@ const DefaultEditor = () => {
     getLineNumbers()
   }, [editor])
 
+  // 动态引入code-block主题
   useEffect(() => {
-    Prism.highlightAll()
-  }, [value])
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = `/prismjs/themes/prism${darkTheme ? '-tomorrow' : '-coy'}.css`
+    document.head.appendChild(link)
 
+    return () => {
+      document.head.removeChild(link)
+    }
+  }, [darkTheme])
+
+  // 监听数据和光标变化
   const editUpdate = (value: Descendant[], editor: CustomEditor) => {
+    const edit = editRef.current
+    if (!edit)
+      return
     const isAstChange = editor.operations.some(
       (op: Operation) => op.type !== 'set_selection',
     )
@@ -92,23 +106,41 @@ const DefaultEditor = () => {
       getLineNumbers()
       dispatch(setContent(value))
     }
-  }
-
-  // 高亮所选行
-  const activeSelection = (event: React.MouseEvent<HTMLDivElement>) => {
-    const edit = editRef.current
-    if (!edit)
-      return
-    const target = event.target as HTMLElement
-
-    const lineElement = target.closest('[data-slate-node="element"]')
-
-    if (lineElement) {
-      const allLines = edit.querySelectorAll('[data-slate-node="element"]')
-      allLines.forEach((line) => {
-        line.classList.remove('active-line')
+    if (editor.operations.some(
+      (op: Operation) => op.type === 'set_selection' || op.type === 'split_node',
+    )) {
+      if (!editor.selection)
+        return
+      const nodeEntry = Editor.above(editor, {
+        at: editor.selection.anchor,
+        match: n => Editor.isBlock(editor, n as CustomElement),
       })
-      lineElement.classList.add('active-line')
+      if (!nodeEntry)
+        return
+      const [node, path] = nodeEntry
+      try {
+        const domNode = ReactEditor.toDOMNode(editor, node)
+        if (domNode) {
+          const allLines = edit.querySelectorAll('[data-slate-node="element"]')
+          allLines.forEach((line) => {
+            line.classList.remove('active-line')
+          })
+          domNode.classList.add('active-line')
+        }
+      } catch {
+        setTimeout(() => {
+          try {
+            const domNode = ReactEditor.toDOMNode(editor, node)
+            if (domNode) {
+              const allLines = edit.querySelectorAll('[data-slate-node="element"]')
+              allLines.forEach((line) => {
+                line.classList.remove('active-line')
+              })
+              domNode.classList.add('active-line')
+            }
+          } catch {}
+        }, 50)
+      }
     }
   }
 
@@ -144,14 +176,14 @@ const DefaultEditor = () => {
           <SetNodeToDecorations />
           <Editable
             ref={editRef}
+            className="editable"
+            data-theme={darkTheme ? 'dark' : 'light'}
             style={{ outline: 'none' }}
             decorate={decorate}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             onKeyDown={onKeyDown}
-            onMouseDown={activeSelection}
             onCopy={handleCopy}
-            className="editable"
             spellCheck={false}
           />
         </Slate>

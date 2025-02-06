@@ -165,6 +165,9 @@ export type CustomText = {
   underline?: true
   italic?: boolean
   code?: boolean
+  url?: boolean
+  mdLink?: boolean
+  uuid?: boolean
 }
 
 export type EmptyText = {

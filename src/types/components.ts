@@ -23,7 +23,31 @@ export type ToolBarPosition = {
   y: number
 }
 
+export type hotkeys = {
+  [key: string]: CustomFormat
+}
+
 export const BlockType = ['paragraph', 'heading-one', 'heading-two', 'block-quote', 'list-item', 'code-block', 'bulleted-list', 'numbered-list']
+export const TextDecorationList = ['paragraph', 'block-quote', 'numbered-list', 'bulleted-list', 'list-item']
+export const MARK_HOTKEYS: hotkeys = {
+  'ctrl+b': 'bold',
+  'ctrl+i': 'italic',
+  'ctrl+u': 'underline',
+}
+export const BLOCK_HOTKEYS: hotkeys = {
+  'ctrl+1': 'heading-one',
+  'ctrl+2': 'heading-two',
+  'ctrl+,': 'block-quote',
+  'ctrl+o': 'numbered-list',
+  'ctrl+l': 'bulleted-list',
+  'ctrl+3': 'left',
+  'ctrl+4': 'center',
+  'ctrl+5': 'right',
+  'ctrl+6': 'justify',
+}
+export const CODEBLOCK_HOTKEY: hotkeys = {
+  'ctrl+`': 'code-block',
+}
 
 export const myRemarkSlateNodeTypes: MyNodeTypes = {
   paragraph: 'paragraph',

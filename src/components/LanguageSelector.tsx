@@ -1,9 +1,14 @@
+import { getSettings } from '@/store/selector'
+import { useSelector } from 'react-redux'
+
 const LanguageSelector = (props: JSX.IntrinsicElements['select']) => {
+  const { darkTheme } = useSelector(getSettings)
   return (
     <select
       data-test-id="language-select"
       contentEditable={false}
       className="language-selector"
+      data-theme={darkTheme ? 'dark' : 'light'}
       {...props}
     >
       <option value="html">HTML</option>

@@ -1,67 +1,26 @@
-import type { CustomElement, MyNodeTypes } from '@/types/slate'
-import { getNotes } from '@/store/selector'
-import { BlockType, myRemarkSlateNodeTypes } from '@/types/components'
+import { getNotes, getSettings } from '@/store/selector'
+import { slateToMd } from '@/utils/slateToMd'
 import Markdown from 'react-markdown'
 import { useSelector } from 'react-redux'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { coy } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { coy, tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import rehypeRaw from 'rehype-raw'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
-import { type OptionType, serialize } from 'remark-slate'
-import { Element, Node } from 'slate'
 
 const PreviewEditor = () => {
   const { content } = useSelector(getNotes)
+  const { darkTheme } = useSelector(getSettings)
   /*
  * Markdown 渲染函数
  */
-  const remarkSlateOpts: OptionType<MyNodeTypes> & { nodeTypes: MyNodeTypes } = {
-    nodeTypes: myRemarkSlateNodeTypes,
-  }
 
   const renderPreviewEditor = () => {
-    const markdownContent: string = content
-      .filter(value => value.children.some(child => child.text !== ''))
-      .map((value) => {
-        if (Element.isElement(value) && BlockType.includes(value.type as string)) {
-          if (value.type === 'code-block') {
-            const modifiedCodeBlock: CustomElement = {
-              ...value,
-              children: value.children.map((codeLine) => {
-                const modifiedCodeLine = {
-                  ...codeLine,
-                  children: codeLine.children.map((textNode) => {
-                    if ('text' in textNode) {
-                      const text = textNode.text.endsWith('\n')
-                        ? textNode.text
-                        : `${textNode.text}\n`
-                      return { ...textNode, text }
-                    }
-                    return textNode
-                  }),
-                }
-                return modifiedCodeLine
-              }),
-            }
-            return serialize(modifiedCodeBlock, remarkSlateOpts)
-          } else {
-            return serialize(value, remarkSlateOpts)
-          }
-        } else {
-          return Node.string(value)
-        }
-      })
-      .join('\n')
-      .replace(/&amp;lt;/g, '<')
-      .replace(/&amp;gt;/g, '>')
-      .replace(/&amp;#39;/g, '\'')
-      .replace(/&amp;quot;/g, '\"')
-      .replace(/&amp;amp;/g, '\&')
-
+    const markdownContent = slateToMd(content)
     return (
       <Markdown
         className="react-markdown"
+        data-theme={darkTheme ? 'dark' : 'light'}
         children={markdownContent}
         remarkPlugins={[[remarkGfm], [remarkBreaks]]}
         rehypePlugins={[rehypeRaw]}
@@ -75,7 +34,7 @@ const PreviewEditor = () => {
                     PreTag="div"
                     children={String(children).replace(/\n$/, '')}
                     language={match ? match[1] : 'typescript'}
-                    style={coy}
+                    style={darkTheme ? tomorrow : coy}
                   />
                 )
               : (
@@ -89,7 +48,10 @@ const PreviewEditor = () => {
     )
   }
   return (
-    <div className="preview-editor">
+    <div
+      className="preview-editor"
+      data-theme={darkTheme ? 'dark' : 'light'}
+    >
       {renderPreviewEditor()}
     </div>
   )

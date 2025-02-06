@@ -1,0 +1,197 @@
+{
+  "cmake.configureOnOpen": true,
+  "fnMap.registrationCode": "DqwPSgdbmcoee7uF+Xj856RtiPWz0OHENc8TbZMb4UYkTB92LGdK82agAh5gGUcbVkM4dSN4CsDzbvA5TggyEKStHrknF70OIah0aUEUHUpABQaoyvkCpu7CvuPuwf6tikSyaZiUqg8qngjwqOvhec2pOckj/eGv058W1AOUJ9NEjdKH1VHuNV33G8h7mVlUyyDnYEEeO/fCm9XwBAxKyLZTw5k8O2Wd8mYDc1fjO1hSgjuqVAotnyLsO5Nq/DLcX9Ne9GegXEjVAugM2eK5hUYyXS+UxiSHybOvXEtPTDD+AHy3huM7nVXggay1E55Fw8zevhz0Zih1B5EO692HpQ==",
+  "cmake.showOptionsMovedNotification": false,
+  "varTranslation.baiduSecret": "20231228001923592,GdI7E9uYGHPb_vcpyD3h",
+  "varTranslation.translationEngine": "baidu",
+  "workbench.iconTheme": "vscode-icons",
+  "editor.formatOnType": true,
+  "C_Cpp.formatting": "vcFormat",
+  "cmake.pinnedCommands": [
+    "workbench.action.tasks.configureTaskRunner",
+    "workbench.action.tasks.runTask"
+  ],
+  "vsicons.dontShowNewVersionMessage": true,
+  "cursorcode.prompt": "",
+  "files.autoSave": "afterDelay",
+  "liveServer.settings.donotShowInfoMsg": true,
+  "files.autoSaveDelay": 300,
+  "liveServer.settings.donotVerifyTags": true,
+  "redhat.telemetry.enabled": true,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmDelete": false,
+  "editor.tabCompletion": "onlySnippets",
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "liveServer.settings.CustomBrowser": "chrome",
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.formatOnSave": true
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.formatOnSave": true
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.formatOnSave": false
+  },
+  "emmet.triggerExpansionOnTab": true,
+  "vetur.format.defaultFormatter.js": "prettier-eslint",
+  "security.workspace.trust.untrustedFiles": "open",
+  "editor.formatOnSave": true,
+  "editor.fontFamily": "'JetBrains Mono', '黑体',  'monospace'",
+  "editor.fontSize": 17,
+  "editor.letterSpacing": 1.5,
+  "editor.fontWeight": "500",
+  "editor.lineHeight": 26,
+  "editor.cursorWidth": 2,
+  "editor.formatOnPaste": true,
+  "code-runner.runInTerminal": true,
+  "code-runner.saveAllFilesBeforeRun": true,
+  "code-runner.saveFileBeforeRun": true,
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "gitlens.defaultDateLocale": "",
+  "files.autoGuessEncoding": true,
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  // Disable the default formatter, use eslint instead
+  "prettier.enable": false,
+  // Auto fix
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never"
+  },
+  // Silent the stylistic rules in you IDE, but still auto fix them
+  "eslint.rules.customizations": [
+    {
+      "rule": "style/*",
+      "fixable": true
+    },
+    {
+      "rule": "format/*",
+      "fixable": true
+    },
+    {
+      "rule": "*-indent",
+      "fixable": true
+    },
+    {
+      "rule": "*-spacing",
+      "fixable": true
+    },
+    {
+      "rule": "*-spaces",
+      "fixable": true
+    },
+    {
+      "rule": "*-order",
+      "fixable": true
+    },
+    {
+      "rule": "*-dangle",
+      "fixable": true
+    },
+    {
+      "rule": "*-newline",
+      "fixable": true
+    },
+    {
+      "rule": "*quotes",
+      "fixable": true
+    },
+    {
+      "rule": "*semi",
+      "fixable": true
+    },
+  ],
+  // Enable eslint for all supported languages
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "vue",
+    "html",
+    "markdown",
+    "json",
+    "jsonc",
+    "yaml",
+    "toml",
+    "xml",
+    "gql",
+    "graphql",
+    "astro",
+    "svelte",
+    "css",
+    "less",
+    "scss",
+    "pcss",
+    "postcss"
+  ],
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8"
+      ]
+    },
+    "Command Prompt": {
+      "path": [
+        "${env:windir}\\Sysnative\\cmd.exe",
+        "${env:windir}\\System32\\cmd.exe"
+      ],
+      "args": [],
+      "icon": "terminal-cmd"
+    },
+    "Git Bash": {
+      "source": "Git Bash"
+    }
+  },
+  "editor.stickyScroll.enabled": false,
+  "git.openRepositoryInParentFolders": "never",
+  "editor.tabSize": 2,
+  "typescript.inlayHints.enumMemberValues.enabled": true,
+  "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
+  "typescript.inlayHints.parameterNames.enabled": "all",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "search.followSymlinks": false,
+  "roo-cline.allowedCommands": [
+    "npm test",
+    "npm install",
+    "tsc",
+    "git log",
+    "git diff",
+    "git show"
+  ],
+  "workbench.colorTheme": "Default Dark Modern"
+}

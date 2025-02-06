@@ -1,19 +1,8 @@
 import type { CodeBlockElement } from '@/types/slate'
 import Prism from 'prismjs'
 import { Editor, Element, Node, type NodeEntry, type Range } from 'slate'
-import { useSlate, useSlateStatic } from 'slate-react'
-import { CodeBlockType } from './editorFunctions'
+import { useSlateStatic } from 'slate-react'
 import { normalizeTokens } from './normalize-Tokens'
-import 'prismjs/components/prism-javascript'
-import 'prismjs/components/prism-jsx'
-import 'prismjs/components/prism-typescript'
-import 'prismjs/components/prism-tsx'
-import 'prismjs/components/prism-markdown'
-import 'prismjs/components/prism-python'
-import 'prismjs/components/prism-php'
-import 'prismjs/components/prism-sql'
-import 'prismjs/components/prism-java'
-import 'prismjs/themes/prism.css'
 
 // 合并map函数
 const mergeMaps = <K, V>(...maps: Map<K, V>[]) => {
@@ -81,7 +70,7 @@ const SetNodeToDecorations = () => {
     Editor.nodes(editor, {
       at: [],
       mode: 'highest',
-      match: n => Element.isElement(n) && n.type === CodeBlockType,
+      match: n => Element.isElement(n) && n.type === 'code-block',
     }),
   )
 

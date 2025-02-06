@@ -1,7 +1,38 @@
 .preview-editor {
   padding: 16px;
   flex: 1;
+  font-size: 18px;
+  &[data-theme='light'] {
+    background-color: $preview-editor-bcc-light;
+  }
+  &[data-theme='dark'] {
+    background-color: $preview-editor-bcc-dark;
+    color: $div-p-color-dark;
+    h1,
+    h2 {
+      color: $h1-h2-color-dark;
+    }
+  }
 
   .react-markdown {
+    h1 {
+      margin: 8px 0px 20px 0px;
+      font-size: 32px;
+      font-weight: 600;
+    }
+    p {
+      font-size: 16px;
+    }
+    ul,
+    ol {
+      margin: 0 0 20px 0;
+      li {
+        font-size: 16px;
+        line-height: 29px;
+      }
+    }
+    pre {
+      font-size: 16px;
+    }
   }
 }

@@ -10,8 +10,13 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #d8d8d8;
-  background-color: #e5e5e5;
+  border: none;
+  &[data-theme='light'] {
+    background-color: $note-menu-bar-bcc-light;
+  }
+  &[data-theme='dark'] {
+    background-color: $note-menu-bar-bcc-dark;
+  }
   nav {
     display: flex;
     justify-content: center;
@@ -19,6 +24,9 @@
   }
   .last-synced {
     font-size: 12px;
+    &[data-theme='dark'] {
+      color: $note-menu-bar-last-synced-color-dark;
+    }
   }
   &-button {
     width: $Scratchpad-menu-bar-button-width;
@@ -27,13 +35,25 @@
     border-collapse: collapse;
     padding: 0px 12px;
     font-size: 17px;
-    color: #666666;
-    background-color: #e5e5e5;
+    &[data-theme='light'] {
+      color: $note-menu-bar-button-color-light;
+      background-color: $note-menu-bar-bcc-light;
+    }
+    &[data-theme='dark'] {
+      color: $note-menu-bar-button-color-dark;
+      background-color: $note-menu-bar-bcc-dark;
+    }
     text-align: center;
     cursor: pointer;
     &:hover {
-      background-color: #d8d8d8;
-      color: #404040;
+      &[data-theme='light'] {
+        background-color: $note-menu-bar-button-hover-bcc-light;
+        color: $note-menu-bar-button-hover-color-light;
+      }
+      &[data-theme='dark'] {
+        background-color: $note-menu-bar-button-hover-bcc-dark;
+        color: $note-menu-bar-button-hover-color-dark;
+      }
     }
   }
 }
