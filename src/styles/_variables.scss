@@ -3,23 +3,41 @@ $ToolBar-column-height: 450px;
 $Scratchpad-menu-bar-button-width: 42px;
 $Scratchpad-menu-bar-button-height: 39px;
 
-// light-theme:
+/*******************************************************************************
+* light-theme
+********************************************************************************/
+// editArea
 $editable-bcc-light: #f5f5f5;
 $editArea-activeLine-bcc-light: #ebedef;
 $line-Number-color-light: #b0b0b0;
 $li-color-light: #6a9fb5;
 $blockquote-color-light: #aaa;
+
+// note-menu-bar
 $note-menu-bar-bcc-light: #e5e5e5;
 $note-menu-bar-last-synced-color-dark: #6d6d6d;
 $note-menu-bar-button-color-light: #666666;
 $note-menu-bar-button-hover-bcc-light: #d8d8d8;
 $note-menu-bar-button-hover-color-light: #404040;
+
+// preview
 $preview-editor-bcc-light: white;
 $toolBar-bcc-light: #a6acaf;
+
+// toolbar
 $toolBar-button-color-light: #cccccc;
 $toolBar-button-active-color-light: black;
 
-// dark-theme:
+// note-list
+$note-list-bcc-light: #e5e5e5;
+$note-list-border-light: #ccc;
+$note-list-search-border-light: #d0d0d0;
+$note-item-border-color-light: #d1d1d1;
+$note-item-text-color-light: #404040;
+$note-item-hover-bcc-light: #d8d8d8;
+/******************************************************************************
+* dark-theme
+******************************************************************************/
 $editable-bcc-dark: #333333;
 $editArea-activeLine-bcc-dark: #222222;
 $line-Number-color-dark: #b0b0b0;
@@ -27,6 +45,7 @@ $h1-h2-color-dark: #f3ca74;
 $div-p-color-dark: #b2b8c4;
 $code-span-plain-parameter-color-dark: #ddd;
 $li-color-dark: #62cfcf;
+$preview-li-color-dark: #d0d0d0;
 $blockquote-color-dark: #616a6b;
 $note-menu-bar-bcc-dark: #242424;
 $note-menu-bar-button-color-dark: #aeaeae;

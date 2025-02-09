@@ -1,4 +1,4 @@
-import type { CustomFormat, MyNodeTypes } from './slate'
+import type { CustomElement, CustomFormat, MyNodeTypes } from './slate'
 
 export type ButtonType = (props: {
   format: CustomFormat
@@ -72,3 +72,11 @@ export const myRemarkSlateNodeTypes: MyNodeTypes = {
   thematic_break: 'thematic_break',
   image: 'image',
 } as unknown as MyNodeTypes
+
+export const emptyElement: CustomElement = {
+  type: 'paragraph',
+  children: [{
+    text: '',
+  }],
+  lineNumber: 1,
+}

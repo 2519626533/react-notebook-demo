@@ -1,0 +1,88 @@
+.notes {
+  display: flex;
+  flex: 1;
+  .note-list {
+    border: 1px $note-list-border-light solid;
+    width: 330px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    &[data-theme='light'] {
+      background-color: $note-list-bcc-light;
+    }
+    &-header {
+      height: 49px;
+      padding: 0 8px;
+      border: 1px solid $note-list-border-light;
+      display: flex;
+      align-items: center;
+      .note-list-search {
+        border: 1px solid $note-list-search-border-light;
+        border-radius: 0.3em;
+        width: 100%;
+        padding: 8px;
+        font-size: 16px;
+      }
+    }
+    &-main {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      .note-item {
+        line-height: 1.5em;
+        padding: 8px;
+        font-size: 14px;
+        border-bottom: 1px solid $note-item-border-color-light;
+        cursor: pointer;
+        &:hover {
+          background-color: $note-item-hover-bcc-light;
+        }
+        &-outer {
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          .note-title {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            .favorite-icon {
+              display: flex;
+              flex: 0 0 25px;
+            }
+            .title-edit {
+              padding: 2px 5px;
+              border: 1px solid $note-item-border-color-light;
+              border-radius: 5px;
+              outline: none;
+              background: #f2f3f4;
+              width: 70%;
+            }
+            .title-text {
+              color: $note-item-text-color-light;
+              overflow: hidden;
+            }
+          }
+          .note-option {
+            padding: 0.4em;
+          }
+        }
+        &-category {
+          margin-left: 25px;
+          display: flex;
+          .category-icon {
+            margin-right: 8px;
+          }
+        }
+      }
+    }
+  }
+  .note-main {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    display: flex;
+  }
+}

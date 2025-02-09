@@ -1,8 +1,10 @@
 import type { MenuItems } from '@/types/layout'
 import type { MenuInfo } from 'rc-menu/es/interface'
+import { addNote } from '@/store/note'
 import { DeleteOutlined, FormOutlined, PlusCircleTwoTone, ReconciliationOutlined, StarOutlined } from '@ant-design/icons'
 import { Layout, Menu, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { Outlet, useNavigate } from 'react-router-dom'
 
 const { Content, Sider } = Layout
@@ -40,6 +42,13 @@ const LayoutPage = () => {
 
   const [collapsed, setCollapsed] = useState(false)
 
+  // 新增note功能
+  const dispatch = useDispatch()
+  const handleAddNote = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    dispatch(addNote())
+  }
+
   return (
     <Layout style={{ minHeight: '100vh', overflow: 'visible' }}>
       <Sider
@@ -51,7 +60,7 @@ const LayoutPage = () => {
         <div className="Layout-Sider-Header">
           <PlusCircleTwoTone style={{ fontSize: '25px' }} className="Layout-Sider-Header-Icon" label="New note" />
           <Tooltip title="New notes" placement="right">
-            <span className="Layout-Sider-Header-add-note">New note</span>
+            <span className="Layout-Sider-Header-add-note" onClick={handleAddNote}>New note</span>
           </Tooltip>
 
         </div>

@@ -10,6 +10,6 @@ export type HeaderType = {
   label: string
 }
 
-export type NoteMenuBarProps = {
-  isNote: boolean
+export type NoteProps = {
+  isScratchpad: boolean
 }

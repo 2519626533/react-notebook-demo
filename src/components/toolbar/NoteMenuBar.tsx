@@ -1,16 +1,15 @@
-import type { NoteMenuBarProps } from '@/types/layout'
-import type { CustomElement } from '@/types/slate'
+import type { NoteProps } from '@/types/layout'
 import { getNotes, getSettings } from '@/store/selector'
 import { togglePreviewMode, toggleThemeMode } from '@/store/setting'
 import { downloadMd } from '@/utils/download'
 import { CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, MoonOutlined, ReloadOutlined, SettingOutlined, StarOutlined, SunOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { type MouseEventHandler, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-const NoteMenuBar: React.FC<NoteMenuBarProps> = ({ isNote }) => {
+const NoteMenuBar: React.FC<NoteProps> = ({ isScratchpad }) => {
   // Selector
-  const { content } = useSelector(getNotes)
+  const { scratchpadContent } = useSelector(getNotes)
   const [currentTime, setCurrentTime] = useState(dayjs()) // 实时时间
   const dispatch = useDispatch()
   /**
@@ -37,7 +36,7 @@ const NoteMenuBar: React.FC<NoteMenuBarProps> = ({ isNote }) => {
   // 下载任务
   const handleDownload = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    downloadMd(content)
+    downloadMd(scratchpadContent)
   }
 
   // 切换主题
@@ -57,7 +56,7 @@ const NoteMenuBar: React.FC<NoteMenuBarProps> = ({ isNote }) => {
         >
           { isPreviewMode ? <EyeOutlined /> : <EditOutlined />}
         </button>
-        {isNote && (
+        {!isScratchpad && (
           <button
             className="note-menu-bar-button"
             data-theme={darkTheme ? 'dark' : 'light'}
@@ -67,7 +66,7 @@ const NoteMenuBar: React.FC<NoteMenuBarProps> = ({ isNote }) => {
             <StarOutlined />
           </button>
         )}
-        {isNote && (
+        {!isScratchpad && (
           <button
             className="note-menu-bar-button"
             data-theme={darkTheme ? 'dark' : 'light'}

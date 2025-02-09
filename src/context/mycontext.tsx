@@ -1,5 +1,5 @@
 import { createContext } from 'react'
 
-const activeContext = createContext<boolean>(false)
+const activeIconContext = createContext<boolean>(false)
 
-export default activeContext
+export default activeIconContext

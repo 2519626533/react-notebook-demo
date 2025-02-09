@@ -1,14 +1,14 @@
-import type { CustomElement, MyNodeTypes } from '@/types/slate'
+import type { CodeLineElement, CustomElement, MyNodeTypes } from '@/types/slate'
 import { BlockType, myRemarkSlateNodeTypes } from '@/types/components'
 import { type OptionType, serialize } from 'remark-slate'
-import { Element, Node } from 'slate'
+import { type Descendant, Element, Node } from 'slate'
 
 const remarkSlateOpts: OptionType<MyNodeTypes> & { nodeTypes: MyNodeTypes } = {
   nodeTypes: myRemarkSlateNodeTypes,
 }
 
-export const slateToMd = (content: CustomElement[]) => {
-  const markdownContent: string = content
+export const slateToMd = (content: Descendant[]) => {
+  const markdownContent: string = (content as CustomElement[])
     .filter(value => value.children.some(child => child.text !== ''))
     .map((value) => {
       if (Element.isElement(value) && BlockType.includes(value.type as string)) {
@@ -18,7 +18,7 @@ export const slateToMd = (content: CustomElement[]) => {
             children: value.children.map((codeLine) => {
               const modifiedCodeLine = {
                 ...codeLine,
-                children: codeLine.children.map((textNode) => {
+                children: (codeLine as CustomElement).children.map((textNode) => {
                   if ('text' in textNode) {
                     const text = textNode.text.endsWith('\n')
                       ? textNode.text

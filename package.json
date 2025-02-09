@@ -19,6 +19,7 @@
     "@types/jszip": "^3.4.0",
     "@types/prismjs": "^1.26.5",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "@types/uuid": "^10.0.0",
     "antd": "^5.22.5",
     "classnames": "^2.5.1",
     "dayjs": "^1.11.13",
@@ -43,7 +44,8 @@
     "slate": "^0.112.0",
     "slate-history": "^0.110.3",
     "slate-react": "^0.112.0",
-    "unified": "^11.0.5"
+    "unified": "^11.0.5",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.12.0",

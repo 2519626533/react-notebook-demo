@@ -13,6 +13,9 @@
     width: 100%;
     max-width: 100%;
     overflow: hidden;
+    &[data-theme='dark'] {
+      background-color: $editable-bcc-dark;
+    }
     .editable {
       padding: 10px 10px;
       border: none;

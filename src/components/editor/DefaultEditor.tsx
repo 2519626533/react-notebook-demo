@@ -1,19 +1,22 @@
+import type { NoteProps } from '@/types/layout'
 import type { CustomEditor, CustomElement } from '@/types/slate'
-import { setContent } from '@/store/note'
+import { setContent, updateNote } from '@/store/note'
 import { getNotes, getSettings } from '@/store/selector'
-import { BlockType } from '@/types/components'
+import { BlockType, emptyElement } from '@/types/components'
+import { emptyNote } from '@/types/slice'
 import { SetNodeToDecorations } from '@/utils/decorationsFn'
 import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorHooks'
-import Prism from 'prismjs'
+import { getActiveNote } from '@/utils/notes-helps'
+import dayjs from 'dayjs'
 import { useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createEditor, type Descendant, Editor, Element, Node, type Operation, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
-import ToolBar from './ToolBar'
+import ToolBar from '../toolbar/ToolBar'
 
 // EditArea主体
-const DefaultEditor = () => {
+const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const editRef = useRef<HTMLDivElement>(null)
   const dispatch = useDispatch()
 
@@ -25,8 +28,17 @@ const DefaultEditor = () => {
   }, [])
 
   // 初始化数据
-  const { content } = useSelector(getNotes)
-  const value: Descendant[] = content
+  const { scratchpadContent, notes, activeNoteId } = useSelector(getNotes)
+  const activeNote = useMemo(() => {
+    return getActiveNote(notes, activeNoteId)
+  }, [notes, activeNoteId])
+
+  const value = useMemo(() => {
+    if (!isScratchpad) {
+      return activeNote ? activeNote.content : [emptyElement]
+    }
+    return scratchpadContent
+  }, [isScratchpad, activeNote, scratchpadContent])
 
   // 渲染块级格式
   const renderElement = useRenderElement()
@@ -46,8 +58,8 @@ const DefaultEditor = () => {
   const getLineNumbers = () => {
     let lineNumber = 1
 
-    const processNode = (node: CustomElement, path: number[]) => {
-      if (node.type === 'code-block' || node.type === 'bulleted-list' || node.type === 'numbered-list') {
+    const processNode = (node: Descendant, path: number[]) => {
+      if ((Element.isElement(node)) && (node.type === 'code-block' || node.type === 'bulleted-list' || node.type === 'numbered-list')) {
         node.children.forEach((child, childIndex) => {
           const childPath = [...path, childIndex]
           Transforms.setNodes(
@@ -67,12 +79,12 @@ const DefaultEditor = () => {
           },
           {
             at: path,
-            match: n => n === node && BlockType.includes(n.type),
+            match: n => Element.isElement(n) && n === node && BlockType.includes(n.type as string),
           },
         )
       }
     }
-    editor.children.forEach((node: CustomElement, index: number) => {
+    editor.children.forEach((node: Descendant, index: number) => {
       processNode(node, [index])
     })
   }
@@ -94,6 +106,10 @@ const DefaultEditor = () => {
     }
   }, [darkTheme])
 
+  if (!isScratchpad && !getActiveNote(notes, activeNoteId)) {
+    return null
+  }
+
   // 监听数据和光标变化
   const editUpdate = (value: Descendant[], editor: CustomEditor) => {
     const edit = editRef.current
@@ -104,7 +120,17 @@ const DefaultEditor = () => {
     )
     if (isAstChange) {
       getLineNumbers()
-      dispatch(setContent(value))
+      isScratchpad
+        ? dispatch(setContent(value))
+        : dispatch(updateNote(activeNote
+            ? {
+                id: activeNote?.id,
+                title: activeNote.title,
+                content: value,
+                createdAt: activeNote.createdAt,
+                updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+              }
+            : emptyNote))
     }
     if (editor.operations.some(
       (op: Operation) => op.type === 'set_selection' || op.type === 'split_node',
@@ -117,7 +143,7 @@ const DefaultEditor = () => {
       })
       if (!nodeEntry)
         return
-      const [node, path] = nodeEntry
+      const [node] = nodeEntry
       try {
         const domNode = ReactEditor.toDOMNode(editor, node)
         if (domNode) {
@@ -166,8 +192,9 @@ const DefaultEditor = () => {
 
   return (
     <div className="notebook">
-      <div className="slate">
+      <div className="slate" data-theme={darkTheme ? 'dark' : 'light'}>
         <Slate
+          key={isScratchpad ? 'scratchpad' : activeNoteId}
           editor={editor}
           initialValue={value}
           onChange={value => editUpdate(value, editor)}

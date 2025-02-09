@@ -11,7 +11,7 @@ import _ from 'lodash'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSlate } from 'slate-react'
-import { AlignJustifyIcon, HeadingOneIcon, HeadingTwoIcon, QuoteIcon } from './MyIcon'
+import { AlignJustifyIcon, HeadingOneIcon, HeadingTwoIcon, QuoteIcon } from '../element/MyIcon'
 
 const Button = React.forwardRef<HTMLSpanElement, PropsWithChildren<{
   active: boolean

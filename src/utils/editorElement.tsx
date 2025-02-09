@@ -1,5 +1,5 @@
 import type { CodeBlockElement, CustomText } from '@/types/slate'
-import LanguageSelector from '@/components/LanguageSelector'
+import LanguageSelector from '@/components/element/LanguageSelector'
 import { getSettings } from '@/store/selector'
 import { useSelector } from 'react-redux'
 import { Transforms } from 'slate'
@@ -21,7 +21,8 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
   const { darkTheme } = useSelector(getSettings)
   const style: React.CSSProperties = { textAlign: align }
   const lineNumber = element.lineNumber || ''
-  const isEmpty = (lineNumber === '')
+  const isEmpty = lineNumber === ''
+
   return (
     <div className="element-container">
       {/* 行号容器 */}
@@ -119,7 +120,11 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
           }
           case 'code-line':
             return (
-              <div {...attributes} style={{ position: 'relative' }}>
+              <div
+                {...attributes}
+                style={{ position: 'relative' }}
+                data-theme={darkTheme ? 'dark' : 'light'}
+              >
                 {children}
               </div>
             )

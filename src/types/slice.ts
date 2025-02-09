@@ -1,4 +1,4 @@
-import type { CustomElement } from './slate'
+import type { Descendant } from 'slate'
 
 export interface RootState {
   setting: SettingState
@@ -10,6 +10,25 @@ export interface SettingState {
   darkTheme: boolean
 }
 
+export interface noteItem {
+  id: string
+  title: string
+  content: Descendant[]
+  createdAt: string
+  updatedAt: string
+  isFavorite?: boolean
+}
+
+export const emptyNote: noteItem = {
+  id: '',
+  title: '',
+  content: [],
+  createdAt: '',
+  updatedAt: '',
+}
+
 export interface NoteState {
-  content: CustomElement[]
+  notes: noteItem[]
+  activeNoteId: string
+  scratchpadContent: Descendant[]
 }

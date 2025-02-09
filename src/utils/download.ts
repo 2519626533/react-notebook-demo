@@ -1,7 +1,7 @@
-import type { CustomElement } from '@/types/slate'
+import type { Descendant } from 'slate'
 import { slateToMd } from './slateToMd'
 
-const downloadMd = (content: CustomElement[]) => {
+const downloadMd = (content: Descendant[]) => {
   const markdownContent = slateToMd(content)
   const blob = new Blob([markdownContent], { type: 'text/markdown' })
   const link = document.createElement('a')

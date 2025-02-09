@@ -47,7 +47,6 @@
     font-family: inherit;
     cursor: auto;
   }
-  em[data-theme='dark'],
   div[data-theme='dark'],
   p[data-theme='dark'] {
     color: $div-p-color-dark;
@@ -96,6 +95,9 @@
           background-color: #808b96;
           &:focus {
             background-color: #bdc3c7;
+          }
+          strong {
+            color: #b2b8c4;
           }
         }
       }

@@ -1,5 +1,9 @@
+import type { NoteProps } from '@/types/layout'
 import { getNotes, getSettings } from '@/store/selector'
+import { emptyElement } from '@/types/components'
+import { getActiveNote } from '@/utils/notes-helps'
 import { slateToMd } from '@/utils/slateToMd'
+import { useMemo } from 'react'
 import Markdown from 'react-markdown'
 import { useSelector } from 'react-redux'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -8,15 +12,26 @@ import rehypeRaw from 'rehype-raw'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
 
-const PreviewEditor = () => {
-  const { content } = useSelector(getNotes)
+const PreviewEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
+  const { scratchpadContent, notes, activeNoteId } = useSelector(getNotes)
+  const activeNote = useMemo(() => {
+    return getActiveNote(notes, activeNoteId)
+  }, [notes, activeNoteId])
+
+  const value = useMemo(() => {
+    if (!isScratchpad) {
+      return activeNote ? activeNote.content : [emptyElement]
+    }
+    return scratchpadContent
+  }, [isScratchpad, activeNote, scratchpadContent])
+
   const { darkTheme } = useSelector(getSettings)
   /*
  * Markdown 渲染函数
  */
 
   const renderPreviewEditor = () => {
-    const markdownContent = slateToMd(content)
+    const markdownContent = slateToMd(value)
     return (
       <Markdown
         className="react-markdown"

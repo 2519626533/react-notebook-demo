@@ -38,6 +38,7 @@
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
+    user-select: none;
     &-Icon {
       transform: rotate(-90deg);
       transition: transform 0.3s ease-in-out;
@@ -87,11 +88,16 @@
 .layout {
   .layout-content {
     display: flex;
-    .Scratchpad {
+    .scratchpad {
       position: relative;
       display: flex;
       flex-direction: column;
       flex: 1;
+    }
+    .notes {
+      position: relative;
+      display: flex;
+      flex-direction: row;
     }
   }
 }

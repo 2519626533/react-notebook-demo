@@ -1,6 +1,6 @@
 import type { MyIcon } from '@/types/components'
 import type { GetProps } from 'antd'
-import activeContext from '@/context/mycontext'
+import activeIconContext from '@/context/mycontext'
 import Icon from '@ant-design/icons'
 import { useContext } from 'react'
 
@@ -9,7 +9,7 @@ type CustomIconComponentProps = GetProps<typeof Icon> & {
 }
 
 const IconSvg: MyIcon = ({ fill, text, textColor, fontSize, x = '50', y = '85' }) => {
-  const active = useContext(activeContext)
+  const active = useContext(activeIconContext)
   return (
     <svg width="1em" height="1em" fill="currentColor" viewBox="0 0 100 100">
       <title>Number One Icon</title>
@@ -30,7 +30,7 @@ const IconSvg: MyIcon = ({ fill, text, textColor, fontSize, x = '50', y = '85' }
   )
 }
 const AlignJustifySvg: MyIcon = ({ fill, pathColor }) => {
-  const active = useContext(activeContext)
+  const active = useContext(activeIconContext)
   return (
     <svg width="1em" height="1em" fill="currentColor" viewBox="0 0 100 100">
       <title>Menu Icon</title>

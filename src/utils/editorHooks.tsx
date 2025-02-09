@@ -1,6 +1,5 @@
 import type { CustomEditor, TextAlginType } from '@/types/slate'
 import type { RenderElementProps, RenderLeafProps } from 'slate-react'
-import { getSettings } from '@/store/selector'
 import { BLOCK_HOTKEYS, CODEBLOCK_HOTKEY, MARK_HOTKEYS, TextDecorationList } from '@/types/components'
 import { Leaf, MyElement } from '@/utils/editorElement'
 import isHotkey from 'is-hotkey'
@@ -36,7 +35,7 @@ const useDecorate = (editor: CustomEditor) => {
     if (Element.isElement(node) && node.type === 'code-block') {
       for (const child of node.children) {
         if (Element.isElement(child) && child.type === 'code-line') {
-          const childRanges = editor.nodeToDecorations.get(child) || []
+          const childRanges = editor.nodeToDecorations?.get(child) || []
           ranges.push(...childRanges)
         }
       }
