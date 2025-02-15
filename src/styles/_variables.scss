@@ -30,9 +30,7 @@ $toolBar-button-active-color-light: black;
 
 // note-list
 $note-list-bcc-light: #e5e5e5;
-$note-list-border-light: #ccc;
-$note-list-search-border-light: #d0d0d0;
-$note-item-border-color-light: #d1d1d1;
+$note-list-border-light: #d0d0d0;
 $note-item-text-color-light: #404040;
 $note-item-hover-bcc-light: #d8d8d8;
 /******************************************************************************
@@ -41,17 +39,31 @@ $note-item-hover-bcc-light: #d8d8d8;
 $editable-bcc-dark: #333333;
 $editArea-activeLine-bcc-dark: #222222;
 $line-Number-color-dark: #b0b0b0;
+
+// editor
+$preview-editor-bcc-dark: #323232;
 $h1-h2-color-dark: #f3ca74;
 $div-p-color-dark: #b2b8c4;
 $code-span-plain-parameter-color-dark: #ddd;
 $li-color-dark: #62cfcf;
 $preview-li-color-dark: #d0d0d0;
 $blockquote-color-dark: #616a6b;
+
+// note-menu-bar
 $note-menu-bar-bcc-dark: #242424;
 $note-menu-bar-button-color-dark: #aeaeae;
 $note-menu-bar-button-hover-bcc-dark: #1a1a1a;
 $note-menu-bar-button-hover-color-dark: #bababa;
-$preview-editor-bcc-dark: #323232;
+
+// toolbar
 $toolBar-bcc-dark: #a6acaf;
 $toolBar-button-color-dark: #cccccc;
 $toolBar-button-active-color-dark: black;
+
+// note-list
+$note-list-bcc-dark: #242424;
+$note-list-border-dark: black;
+$note-list-search-bcc-dark: #404040;
+$note-list-border-dark: black;
+$note-item-text-color-dark: #b7b7b7;
+$note-item-hover-bcc-dark: #333333;

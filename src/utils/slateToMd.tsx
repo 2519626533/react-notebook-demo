@@ -55,5 +55,6 @@ export const slateToMd = (content: Descendant[]) => {
     .replace(/&amp;#39;/g, '\'')
     .replace(/&amp;quot;/g, '\"')
     .replace(/&amp;amp;/g, '\&')
+
   return markdownContent
 }

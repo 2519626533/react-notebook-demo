@@ -10,7 +10,7 @@ import { getActiveNote } from '@/utils/notes-helps'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { createEditor, type Descendant, Editor, Element, Node, type Operation, Transforms } from 'slate'
+import { createEditor, type Descendant, Editor, Element, Node, type Operation, Path, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
 import ToolBar from '../toolbar/ToolBar'
@@ -18,6 +18,7 @@ import ToolBar from '../toolbar/ToolBar'
 // EditArea主体
 const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const editRef = useRef<HTMLDivElement>(null)
+  const { scratchpadContent, notes, activeNoteId } = useSelector(getNotes)
   const dispatch = useDispatch()
 
   // 创建Slate
@@ -25,12 +26,15 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     const editor = withHistory(withReact(createEditor()))
     editor.nodeToDecorations = new Map()
     return editor
-  }, [])
+  }, [activeNoteId])
 
   // 初始化数据
-  const { scratchpadContent, notes, activeNoteId } = useSelector(getNotes)
   const activeNote = useMemo(() => {
-    return getActiveNote(notes, activeNoteId)
+    const note = getActiveNote(notes, activeNoteId)
+    if (note && (!note.content || note?.content.length === 0)) {
+      note.content = [emptyElement]
+    }
+    return note
   }, [notes, activeNoteId])
 
   const value = useMemo(() => {
@@ -55,44 +59,45 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   // 获取当前主题
   const { darkTheme } = useSelector(getSettings)
 
+  // 行号计算函数
   const getLineNumbers = () => {
     let lineNumber = 1
 
-    const processNode = (node: Descendant, path: number[]) => {
-      if ((Element.isElement(node)) && (node.type === 'code-block' || node.type === 'bulleted-list' || node.type === 'numbered-list')) {
-        node.children.forEach((child, childIndex) => {
-          const childPath = [...path, childIndex]
+    Array.from(Editor.nodes(editor, {
+      at: [],
+      match: n =>
+        Element.isElement(n)
+        && (n.type === 'code-block'
+          || n.type === 'bulleted-list'
+          || n.type === 'numbered-list'
+          || BlockType.includes(n.type as string)),
+      mode: 'highest',
+    })).sort(([_, aPath], [__, bPath]) => Path.compare(aPath, bPath)).forEach(([node, path]) => {
+      if (Element.isElement(node)) {
+        if (node.type === 'code-block' || node.type === 'bulleted-list' || node.type === 'numbered-list') {
+          node.children.forEach((child, childIndex) => {
+            const childPath = [...path, childIndex]
+            Transforms.setNodes(
+              editor,
+              { lineNumber: lineNumber++ },
+              { at: childPath },
+            )
+          })
+        } else if (BlockType.includes(node.type as string)) {
           Transforms.setNodes(
             editor,
             { lineNumber: lineNumber++ },
-            {
-              at: childPath,
-              match: n => n === child,
-            },
+            { at: path },
           )
-        })
-      } else {
-        Transforms.setNodes(
-          editor,
-          {
-            lineNumber: lineNumber++,
-          },
-          {
-            at: path,
-            match: n => Element.isElement(n) && n === node && BlockType.includes(n.type as string),
-          },
-        )
+        }
       }
-    }
-    editor.children.forEach((node: Descendant, index: number) => {
-      processNode(node, [index])
     })
   }
 
+  // 动态渲染line-number
   useEffect(() => {
-    // 初始计算
     getLineNumbers()
-  }, [editor])
+  }, [editor, value])
 
   // 动态引入code-block主题
   useEffect(() => {
@@ -106,9 +111,28 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     }
   }, [darkTheme])
 
-  if (!isScratchpad && !getActiveNote(notes, activeNoteId)) {
-    return null
-  }
+  // // 修改 useEffect 逻辑，直接重置 editor 的 children 和 selection
+  // useEffect(() => {
+  //   if (activeNote) {
+  //     // 强制重置选区
+  //     Transforms.deselect(editor)
+  //     // 清空操作历史
+  //     editor.history = { undos: [], redos: [] }
+  //   }
+  // }, [activeNoteId])
+
+  // 计时器延迟渲染toolBar
+  // useEffect(() => {
+  //   dispatch(updateIsEditorReady(false))
+  //   const timerOut = setTimeout(() => {
+  //     dispatch(updateIsEditorReady(true))
+  //   }, 0)
+  //   return () => clearTimeout(timerOut)
+  // }, [activeNoteId, editor, dispatch])
+
+  // if (!isScratchpad && !activeNote) {
+  //   return null
+  // }
 
   // 监听数据和光标变化
   const editUpdate = (value: Descendant[], editor: CustomEditor) => {
@@ -197,7 +221,9 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
           key={isScratchpad ? 'scratchpad' : activeNoteId}
           editor={editor}
           initialValue={value}
-          onChange={value => editUpdate(value, editor)}
+          onChange={(value) => {
+            editUpdate(value, editor)
+          }}
         >
           <ToolBar />
           <SetNodeToDecorations />
@@ -216,7 +242,6 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
         </Slate>
       </div>
     </div>
-
   )
 }
 

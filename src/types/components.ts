@@ -1,4 +1,5 @@
 import type { CustomElement, CustomFormat, MyNodeTypes } from './slate'
+import type { noteItem } from './slice'
 
 export type ButtonType = (props: {
   format: CustomFormat
@@ -79,4 +80,13 @@ export const emptyElement: CustomElement = {
     text: '',
   }],
   lineNumber: 1,
+}
+
+/**********************************************************************************
+* NoteLink
+**********************************************************************************/
+export interface NoteLinkProps {
+  uuid: string
+  notes: noteItem[]
+  handleNoteLinkClick: (e: React.SyntheticEvent, note: noteItem) => void
 }

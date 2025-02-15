@@ -29,31 +29,44 @@
     }
   }
   &-button {
-    width: $Scratchpad-menu-bar-button-width;
+    // width: $Scratchpad-menu-bar-button-width;
     height: $Scratchpad-menu-bar-button-height;
     border: none;
     border-collapse: collapse;
     padding: 0px 12px;
     font-size: 17px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
     &[data-theme='light'] {
       color: $note-menu-bar-button-color-light;
       background-color: $note-menu-bar-bcc-light;
     }
+
     &[data-theme='dark'] {
       color: $note-menu-bar-button-color-dark;
       background-color: $note-menu-bar-bcc-dark;
     }
+
     text-align: center;
     cursor: pointer;
+
     &:hover {
       &[data-theme='light'] {
         background-color: $note-menu-bar-button-hover-bcc-light;
         color: $note-menu-bar-button-hover-color-light;
       }
+
       &[data-theme='dark'] {
         background-color: $note-menu-bar-button-hover-bcc-dark;
         color: $note-menu-bar-button-hover-color-dark;
       }
+    }
+
+    .uuid-copy-success {
+      padding-left: 8px;
+      font-size: 0.7em;
     }
   }
 }

@@ -1,13 +1,14 @@
 import type { noteItem } from '@/types/slice'
-import { setActiveNote, updateNote, updateNoteTitle } from '@/store/note'
+import { setActiveNote, updateNoteTitle } from '@/store/note'
 import { getNotes, getSettings } from '@/store/selector'
 import { EllipsisOutlined, ReconciliationOutlined, StarOutlined } from '@ant-design/icons'
+import classnames from 'classnames'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 const NoteList = () => {
   const { darkTheme } = useSelector(getSettings)
-  const { notes } = useSelector(getNotes)
+  const { notes, activeNoteId } = useSelector(getNotes)
   const dispatch = useDispatch()
 
   // 双击事件：editTitle
@@ -42,11 +43,14 @@ const NoteList = () => {
       <div className="note-list-header">
         <input placeholder="Search for notes" className="note-list-search" />
       </div>
-      <div className="note-list-main">
+      <div className="note-list-main" data-theme={darkTheme ? 'dark' : 'light'}>
         {notes.map((note) => {
           return (
             <div
-              className="note-item"
+              className={classnames(
+                'note-item',
+                { selected: activeNoteId === note.id },
+              )}
               key={note.id}
               data-note-num={notes.indexOf(note)}
               onClick={() => handleActiveNote(note.id)}
@@ -58,7 +62,6 @@ const NoteList = () => {
                     ? (
                         <input
                           className="title-edit"
-                          value={editedTitle}
                           onChange={handleTitleChange}
                           onBlur={() => saveTitle(note)}
                           onKeyDown={(e) => {

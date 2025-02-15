@@ -59,7 +59,6 @@ const getChildNodeToDecorations = ([
       start = end
     }
   }
-  // console.log(nodeToDecorations)
   return nodeToDecorations
 }
 
@@ -79,7 +78,6 @@ const SetNodeToDecorations = () => {
   )
 
   editor.nodeToDecorations = nodeToDecorations
-  // console.log('nodeToDecorations:', nodeToDecorations)
   return null
 }
 

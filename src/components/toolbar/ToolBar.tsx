@@ -110,10 +110,9 @@ const ToolBar = () => {
   const editor = useSlate()
   const { selection } = editor
 
-  // const editorRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
     dispatch(getPosition())
-  }, [])
+  }, [dispatch])
 
   // 监视selection自动展开
   useEffect(() => {
