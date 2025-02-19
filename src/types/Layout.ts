@@ -13,3 +13,10 @@ export type HeaderType = {
 export type NoteProps = {
   isScratchpad: boolean
 }
+
+export interface LastSyncProps {
+  syncing: boolean
+  pendingSync: boolean
+  datetime: string
+  darkTheme: boolean
+}

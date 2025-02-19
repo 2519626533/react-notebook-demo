@@ -24,6 +24,7 @@
   }
   .last-synced {
     font-size: 12px;
+    padding-right: 5px;
     &[data-theme='dark'] {
       color: $note-menu-bar-last-synced-color-dark;
     }

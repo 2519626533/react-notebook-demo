@@ -1,12 +1,12 @@
 import type { NoteProps } from '@/types/layout'
 import type { CustomEditor, CustomElement } from '@/types/slate'
-import { setContent, updateNote } from '@/store/note'
+import { updateNote } from '@/store/note'
 import { getNotes, getSettings } from '@/store/selector'
 import { BlockType, emptyElement } from '@/types/components'
 import { emptyNote } from '@/types/slice'
 import { SetNodeToDecorations } from '@/utils/decorationsFn'
 import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorHooks'
-import { getActiveNote } from '@/utils/notes-helps'
+import { getActiveNote, getScratchpad } from '@/utils/notes-helps'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -18,7 +18,7 @@ import ToolBar from '../toolbar/ToolBar'
 // EditArea主体
 const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const editRef = useRef<HTMLDivElement>(null)
-  const { scratchpadContent, notes, activeNoteId } = useSelector(getNotes)
+  const { notes, activeNoteId } = useSelector(getNotes)
   const dispatch = useDispatch()
 
   // 创建Slate
@@ -30,19 +30,20 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
 
   // 初始化数据
   const activeNote = useMemo(() => {
-    const note = getActiveNote(notes, activeNoteId)
-    if (note && (!note.content || note?.content.length === 0)) {
-      note.content = [emptyElement]
+    if (isScratchpad) {
+      return getScratchpad(notes)
+    } else {
+      const note = getActiveNote(notes, activeNoteId)
+      if (note && (!note.content || note?.content.length === 0)) {
+        note.content = [emptyElement]
+      }
+      return note
     }
-    return note
-  }, [notes, activeNoteId])
+  }, [notes, activeNoteId, isScratchpad])
 
   const value = useMemo(() => {
-    if (!isScratchpad) {
-      return activeNote ? activeNote.content : [emptyElement]
-    }
-    return scratchpadContent
-  }, [isScratchpad, activeNote, scratchpadContent])
+    return activeNote ? activeNote.content : [emptyElement]
+  }, [activeNote])
 
   // 渲染块级格式
   const renderElement = useRenderElement()
@@ -144,17 +145,16 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     )
     if (isAstChange) {
       getLineNumbers()
-      isScratchpad
-        ? dispatch(setContent(value))
-        : dispatch(updateNote(activeNote
-            ? {
-                id: activeNote?.id,
-                title: activeNote.title,
-                content: value,
-                createdAt: activeNote.createdAt,
-                updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-              }
-            : emptyNote))
+      dispatch(updateNote(activeNote
+        ? {
+            id: activeNote?.id,
+            title: activeNote.title,
+            content: value,
+            createdAt: activeNote.createdAt,
+            updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+            scratchpad: !!isScratchpad,
+          }
+        : emptyNote))
     }
     if (editor.operations.some(
       (op: Operation) => op.type === 'set_selection' || op.type === 'split_node',
@@ -218,7 +218,7 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     <div className="notebook">
       <div className="slate" data-theme={darkTheme ? 'dark' : 'light'}>
         <Slate
-          key={isScratchpad ? 'scratchpad' : activeNoteId}
+          key={activeNoteId}
           editor={editor}
           initialValue={value}
           onChange={(value) => {

@@ -1,20 +1,30 @@
 import type { noteItem, NoteState } from '@/types/slice'
-import { saveNotesLocal, saveScratchpadLocal } from '@/apis/localStorage'
+import { Folder } from '@/utils/enums'
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import dayjs from 'dayjs'
-import { v4 as uuid } from 'uuid'
 
-const slateInitial = [{
-  type: 'paragraph',
-  children: [{
-    text: '',
-  }],
-}]
+export const getFirstNoteId = (
+  folder: Folder,
+  notes: noteItem[],
+) => {
+  const availableNotes = notes
+
+  const firstNote: noteItem | undefined = {
+    [Folder.NOTES]: () => availableNotes.find(note => !note.scratchpad),
+    [Folder.SCRATCHPAD]: () => availableNotes.find(note => note.scratchpad),
+    [Folder.FAVORITES]: () => availableNotes.find(note => note.favorite),
+    [Folder.TRASH]: () => availableNotes.find(note => note.trash),
+  }[folder]()
+
+  return firstNote ? firstNote.id : ''
+}
 
 export const noteInitialState: NoteState = {
-  notes: JSON.parse(localStorage.getItem('notes') as string) || [],
+  notes: [],
   activeNoteId: '',
-  scratchpadContent: JSON.parse(localStorage.getItem('scratchpad-content') as string) || slateInitial,
+  activeFolder: Folder.NOTES,
+  searchValue: '',
+  loading: true,
+  error: '',
 }
 
 const noteStore = createSlice({
@@ -22,22 +32,8 @@ const noteStore = createSlice({
   initialState: noteInitialState,
   reducers: {
     // 新增笔记
-    addNote(state) {
-      const newNote: noteItem = {
-        id: uuid(),
-        title: 'Untitled',
-        content: [
-          {
-            type: 'paragraph',
-            children: [{ text: '' }],
-            lineNumber: 1,
-          },
-        ],
-        createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-        updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-      }
-      state.notes.push(newNote)
-      saveNotesLocal(state.notes)
+    addNote(state, { payload }: PayloadAction<noteItem>) {
+      state.notes.push(payload)
     },
     // 设置当前所选笔记
     setActiveNote(state, action) {
@@ -54,7 +50,6 @@ const noteStore = createSlice({
             }
           : note,
       )
-      saveNotesLocal(state.notes)
     },
     // 更新笔记标题
     updateNoteTitle(state, { payload }: PayloadAction<noteItem>) {
@@ -66,28 +61,61 @@ const noteStore = createSlice({
             }
           : note,
       )
-      saveNotesLocal(state.notes)
     },
-    // 设置scratchpad内容的更新
-    setContent(state, action) {
-      state.scratchpadContent = action.payload
-      saveScratchpadLocal(state.scratchpadContent)
+    // 添加笔记到favorites
+    toggleNoteToFavorite(state, { payload }: PayloadAction<string>) {
+      state.notes = state.notes.map(note =>
+        note.id === payload ? { ...note, favorite: !note.favorite } : note,
+      )
     },
     // 删除笔记
     deleteNote(state, { payload }: PayloadAction<string>) {
       state.notes = state.notes.filter(note => !payload.includes(note.id))
-      saveNotesLocal(state.notes)
       state.activeNoteId = ''
+    },
+    // 更新搜索词
+    updateSearchValue(state, { payload }: PayloadAction<string>) {
+      state.searchValue = payload
+    },
+    // 切换文件夹
+    swapFolder(state, { payload }: PayloadAction<{ folder: Folder }>) {
+      if (state.activeFolder !== payload.folder) {
+        state.activeFolder = payload.folder
+        state.activeNoteId = getFirstNoteId(
+          payload.folder,
+          state.notes,
+        )
+      }
+    },
+    // 从 localStorage中获取notes
+    loadNote(state) {
+      state.loading = true
+    },
+    loadNotesSuccess(state, { payload }: PayloadAction<{ notes: noteItem[] }>) {
+      state.notes = payload.notes
+      state.activeNoteId = getFirstNoteId(
+        Folder.NOTES,
+        payload.notes,
+      )
+    },
+    loadNotesError(state, { payload }: PayloadAction<string>) {
+      state.loading = false
+      state.error = payload
     },
   },
 })
 
 export const noteReducer = noteStore.reducer
 export const {
-  setContent,
   addNote,
   setActiveNote,
   updateNote,
   updateNoteTitle,
+  toggleNoteToFavorite,
   deleteNote,
+  updateSearchValue,
+  swapFolder,
+  loadNote,
+  loadNotesSuccess,
+  loadNotesError,
 } = noteStore.actions

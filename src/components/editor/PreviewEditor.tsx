@@ -1,9 +1,10 @@
 import type { NoteProps } from '@/types/layout'
 import type { noteItem } from '@/types/slice'
-import { setActiveNote } from '@/store/note'
+import { setActiveNote, swapFolder } from '@/store/note'
 import { getNotes, getSettings } from '@/store/selector'
 import { emptyElement } from '@/types/components'
-import { getActiveNote } from '@/utils/notes-helps'
+import { Folder } from '@/utils/enums'
+import { getActiveNote, getScratchpad } from '@/utils/notes-helps'
 import { uuidPlugin } from '@/utils/reactMarkdownPlugins'
 import { slateToMd } from '@/utils/slateToMd'
 import { useMemo } from 'react'
@@ -18,17 +19,22 @@ import NoteLink from '../element/NoteLink'
 
 const PreviewEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const dispatch = useDispatch()
-  const { scratchpadContent, notes, activeNoteId } = useSelector(getNotes)
+  const { notes, activeNoteId } = useSelector(getNotes)
   const activeNote = useMemo(() => {
-    return getActiveNote(notes, activeNoteId)
-  }, [notes, activeNoteId])
+    if (isScratchpad) {
+      return getScratchpad(notes)
+    } else {
+      const note = getActiveNote(notes, activeNoteId)
+      if (note && (!note.content || note?.content.length === 0)) {
+        note.content = [emptyElement]
+      }
+      return note
+    }
+  }, [notes, activeNoteId, isScratchpad])
 
   const value = useMemo(() => {
-    if (!isScratchpad) {
-      return activeNote ? activeNote.content : [emptyElement]
-    }
-    return scratchpadContent
-  }, [isScratchpad, activeNote, scratchpadContent])
+    return activeNote ? activeNote.content : [emptyElement]
+  }, [activeNote])
 
   const { darkTheme } = useSelector(getSettings)
 
@@ -37,6 +43,11 @@ const PreviewEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
 
     if (note) {
       dispatch(setActiveNote(note.id))
+      if (note.scratchpad) {
+        dispatch(swapFolder({ folder: Folder.SCRATCHPAD }))
+      } else if (note.favorite) {
+        dispatch(swapFolder({ folder: Folder.FAVORITES }))
+      }
     }
   }
 

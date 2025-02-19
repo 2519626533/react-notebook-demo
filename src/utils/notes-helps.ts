@@ -4,6 +4,10 @@ import type { noteItem } from '@/types/slice'
 export const getActiveNote = (notes: noteItem[], activeNoteId: string) =>
   notes.find(note => note.id === activeNoteId)
 
+// 获取scratchpad
+export const getScratchpad = (notes: noteItem[]) =>
+  notes.find(note => note.scratchpad)
+
 // 获取6位的uuid
 export const getShortUuid = (uuid: string) => {
   return uuid.substring(0, 6)

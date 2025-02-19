@@ -1,9 +1,10 @@
 import type { SettingState } from '@/types/slice'
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 export const settingInitialState: SettingState = {
   isPreviewMode: false,
   darkTheme: false,
+  loading: true,
 }
 
 const settingStore = createSlice({
@@ -16,8 +17,23 @@ const settingStore = createSlice({
     toggleThemeMode(state) {
       state.darkTheme = !state.darkTheme
     },
+    loadSetting(state) {
+      state.loading = true
+    },
+    loadSettingsError(state) {
+      state.loading = false
+    },
+    loadSettingSuccess(state, { payload }: PayloadAction<SettingState>) {
+      return { ...payload, loading: false }
+    },
   },
 })
 
 export const settingReducer = settingStore.reducer
-export const { togglePreviewMode, toggleThemeMode } = settingStore.actions
+export const {
+  togglePreviewMode,
+  toggleThemeMode,
+  loadSetting,
+  loadSettingSuccess,
+  loadSettingsError,
+} = settingStore.actions

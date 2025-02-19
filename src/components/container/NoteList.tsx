@@ -1,15 +1,36 @@
 import type { noteItem } from '@/types/slice'
-import { setActiveNote, updateNoteTitle } from '@/store/note'
+import { setActiveNote, updateNoteTitle, updateSearchValue } from '@/store/note'
 import { getNotes, getSettings } from '@/store/selector'
+import { Folder } from '@/utils/enums'
 import { EllipsisOutlined, ReconciliationOutlined, StarOutlined } from '@ant-design/icons'
 import classnames from 'classnames'
+import { debounce } from 'lodash'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import SearchBar from '../element/SearchBar'
 
 const NoteList = () => {
   const { darkTheme } = useSelector(getSettings)
-  const { notes, activeNoteId } = useSelector(getNotes)
+  const { notes, activeNoteId, searchValue, activeFolder } = useSelector(getNotes)
   const dispatch = useDispatch()
+
+  // 搜索词正则表达式及匹配
+  const searchReg = new RegExp(searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
+  const titleMatch = (result: noteItem) => searchReg.test(result.title)
+  // const contentMatch = (result: noteItem) => searchReg.test(result.content.toString())
+
+  // 过滤notes
+  const filter: Record<Folder, (note: noteItem) => boolean> = {
+    [Folder.SCRATCHPAD]: note => !!note.scratchpad,
+    [Folder.NOTES]: note => !note.scratchpad && !note.trash,
+    [Folder.FAVORITES]: note => !!note.favorite && !note.trash,
+    [Folder.TRASH]: note => !!note.trash,
+  }
+
+  // 渲染组件所需数据
+  const filteredNotes = notes
+    .filter(filter[activeFolder])
+    .filter(titleMatch)
 
   // 双击事件：editTitle
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -38,13 +59,38 @@ const NoteList = () => {
   const handleActiveNote = (id: string) => {
     dispatch(setActiveNote(id))
   }
+
+  // 输入事件：searchNotes
+  const handleSearchNotes = debounce(
+    (searchValue: string) => dispatch(updateSearchValue(searchValue)),
+  )
   return (
     <div className="note-list" data-theme={darkTheme ? 'dark' : 'light'}>
       <div className="note-list-header">
-        <input placeholder="Search for notes" className="note-list-search" />
+        <SearchBar searchNotes={handleSearchNotes} />
       </div>
       <div className="note-list-main" data-theme={darkTheme ? 'dark' : 'light'}>
-        {notes.map((note) => {
+        {filteredNotes.map((note) => {
+          let noteTitle: string | React.ReactElement = note.title
+
+          if (searchValue) {
+            const highlightStart = noteTitle.search(searchReg)
+
+            if (highlightStart !== -1) {
+              const highlightEnd = highlightStart + searchValue.length
+
+              noteTitle = (
+                <>
+                  {noteTitle.slice(0, highlightStart)}
+                  <strong className="search-value-highlight">
+                    {noteTitle.slice(highlightStart, highlightEnd)}
+                  </strong>
+                  {noteTitle.slice(highlightEnd)}
+                </>
+              )
+            }
+          }
+
           return (
             <div
               className={classnames(
@@ -78,7 +124,7 @@ const NoteList = () => {
                           className="title-text"
                           onDoubleClick={() => handleDoubleClick(note)}
                         >
-                          {note.title}
+                          {noteTitle}
                         </div>
                       )}
                 </div>

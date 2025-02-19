@@ -90,3 +90,7 @@ export interface NoteLinkProps {
   notes: noteItem[]
   handleNoteLinkClick: (e: React.SyntheticEvent, note: noteItem) => void
 }
+
+export interface SearchBarProps {
+  searchNotes: (searchValue: string) => void
+}

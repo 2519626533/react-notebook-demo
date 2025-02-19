@@ -1,11 +1,17 @@
 import type { MenuItems } from '@/types/layout'
+import type { noteItem } from '@/types/slice'
 import type { MenuInfo } from 'rc-menu/es/interface'
-import { addNote } from '@/store/note'
+import { addNote, loadNote, swapFolder } from '@/store/note'
+import { getNotes } from '@/store/selector'
+import { loadSetting } from '@/store/setting'
+import { FolderToKeyMap, KeyToFolderMap } from '@/utils/enums'
 import { DeleteOutlined, FormOutlined, PlusCircleTwoTone, ReconciliationOutlined, StarOutlined } from '@ant-design/icons'
 import { Layout, Menu, Tooltip } from 'antd'
+import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { v4 as uuid } from 'uuid'
 
 const { Content, Sider } = Layout
 
@@ -28,25 +34,69 @@ const items: MenuItems[] = [{
 }]
 
 const LayoutPage = () => {
-  const [selectedKey, setSelectedKey] = useState('')
-  useEffect(() => {
-    setSelectedKey(window.location.pathname)
-  }, [])
-  // 切换路由功能
+  // Redux state
+  const { activeFolder } = useSelector(getNotes)
+  const [selectedKey, setSelectedKey] = useState(FolderToKeyMap[activeFolder])
+  const dispatch = useDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // TakeNote应用初始化
+  useEffect(() => {
+    dispatch(loadNote())
+    dispatch(loadSetting())
+  }, [])
+
+  // 路由更新时同步activeFolder
+  useEffect(() => {
+    const path = location.pathname
+    const newFolder = KeyToFolderMap[path]
+
+    if (newFolder && newFolder !== activeFolder) {
+      dispatch(swapFolder({ folder: newFolder }))
+      setSelectedKey(path)
+    }
+  }, [location.pathname, dispatch])
+
+  // activeFolder更新时同步路由
+  useEffect(() => {
+    const newPath = FolderToKeyMap[activeFolder]
+    if (selectedKey !== newPath) {
+      setSelectedKey(newPath)
+      navigate(newPath)
+    }
+  }, [activeFolder, navigate, selectedKey])
+
   const onSelect = (e: MenuInfo): void => {
     const { key } = e
-    setSelectedKey(key)
-    navigate(key)
+    const newFolder = KeyToFolderMap[key]
+
+    if (newFolder) {
+      dispatch(swapFolder({ folder: newFolder }))
+    }
   }
 
   const [collapsed, setCollapsed] = useState(false)
 
   // 新增note功能
-  const dispatch = useDispatch()
   const handleAddNote = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault()
-    dispatch(addNote())
+    const newNote: noteItem = {
+      id: uuid(),
+      title: 'Untitled',
+      content: [{
+        type: 'paragraph',
+        children: [{
+          text: '',
+        }],
+        lineNumber: 1,
+      }],
+      // favorite: false,
+      // trash: false,
+      createdAt: dayjs().format('YYYY-MM-DD HH-mm-ss'),
+      updatedAt: dayjs().format('YYYY-MM-DD HH-mm-ss'),
+    }
+    dispatch(addNote(newNote))
   }
 
   return (
