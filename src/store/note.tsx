@@ -68,10 +68,20 @@ const noteStore = createSlice({
         note.id === payload ? { ...note, favorite: !note.favorite } : note,
       )
     },
-    // 删除笔记
-    deleteNote(state, { payload }: PayloadAction<string>) {
-      state.notes = state.notes.filter(note => !payload.includes(note.id))
-      state.activeNoteId = ''
+    // 将笔记移入Trash
+    toggleTrashNotes(state, { payload }: PayloadAction<string>) {
+      state.notes = state.notes.map(note =>
+        (note.id === payload) ? { ...note, trash: !note.trash } : note)
+    },
+    // Empty the Trash
+    pruneEmptyNotes(state) {
+      state.notes = state.notes.filter(
+        note => !note.trash,
+      )
+      state.activeNoteId = getFirstNoteId(
+        Folder.TRASH,
+        state.notes,
+      )
     },
     // 更新搜索词
     updateSearchValue(state, { payload }: PayloadAction<string>) {
@@ -79,13 +89,11 @@ const noteStore = createSlice({
     },
     // 切换文件夹
     swapFolder(state, { payload }: PayloadAction<{ folder: Folder }>) {
-      if (state.activeFolder !== payload.folder) {
-        state.activeFolder = payload.folder
-        state.activeNoteId = getFirstNoteId(
-          payload.folder,
-          state.notes,
-        )
-      }
+      state.activeFolder = payload.folder
+      state.activeNoteId = getFirstNoteId(
+        payload.folder,
+        state.notes,
+      )
     },
     // 从 localStorage中获取notes
     loadNote(state) {
@@ -94,7 +102,7 @@ const noteStore = createSlice({
     loadNotesSuccess(state, { payload }: PayloadAction<{ notes: noteItem[] }>) {
       state.notes = payload.notes
       state.activeNoteId = getFirstNoteId(
-        Folder.NOTES,
+        state.activeFolder,
         payload.notes,
       )
     },
@@ -112,10 +120,11 @@ export const {
   updateNote,
   updateNoteTitle,
   toggleNoteToFavorite,
-  deleteNote,
+  toggleTrashNotes,
   updateSearchValue,
   swapFolder,
   loadNote,
   loadNotesSuccess,
   loadNotesError,
+  pruneEmptyNotes,
 } = noteStore.actions

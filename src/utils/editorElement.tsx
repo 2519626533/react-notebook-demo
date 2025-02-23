@@ -4,15 +4,6 @@ import { getSettings } from '@/store/selector'
 import { useSelector } from 'react-redux'
 import { Transforms } from 'slate'
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
-import 'prismjs/components/prism-javascript'
-import 'prismjs/components/prism-jsx'
-import 'prismjs/components/prism-typescript'
-import 'prismjs/components/prism-tsx'
-import 'prismjs/components/prism-markdown'
-import 'prismjs/components/prism-python'
-import 'prismjs/components/prism-php'
-import 'prismjs/components/prism-sql'
-import 'prismjs/components/prism-java'
 
 // Element
 const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element }) => {

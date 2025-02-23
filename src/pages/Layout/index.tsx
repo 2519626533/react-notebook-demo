@@ -4,9 +4,11 @@ import type { MenuInfo } from 'rc-menu/es/interface'
 import { addNote, loadNote, swapFolder } from '@/store/note'
 import { getNotes } from '@/store/selector'
 import { loadSetting } from '@/store/setting'
+import { sync } from '@/store/sync'
+import { useInterval } from '@/utils/editorHooks'
 import { FolderToKeyMap, KeyToFolderMap } from '@/utils/enums'
 import { DeleteOutlined, FormOutlined, PlusCircleTwoTone, ReconciliationOutlined, StarOutlined } from '@ant-design/icons'
-import { Layout, Menu, Tooltip } from 'antd'
+import { Layout, Menu } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -35,7 +37,7 @@ const items: MenuItems[] = [{
 
 const LayoutPage = () => {
   // Redux state
-  const { activeFolder } = useSelector(getNotes)
+  const { notes, activeFolder } = useSelector(getNotes)
   const [selectedKey, setSelectedKey] = useState(FolderToKeyMap[activeFolder])
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -46,6 +48,11 @@ const LayoutPage = () => {
     dispatch(loadNote())
     dispatch(loadSetting())
   }, [])
+
+  // 定时自动sync
+  useInterval(() => {
+    dispatch(sync({ notes }))
+  }, 30000)
 
   // 路由更新时同步activeFolder
   useEffect(() => {
@@ -107,11 +114,9 @@ const LayoutPage = () => {
         onCollapse={value => setCollapsed(value)}
         className="Layout-Sider"
       >
-        <div className="Layout-Sider-Header">
+        <div className="Layout-Sider-Header" onClick={handleAddNote}>
           <PlusCircleTwoTone style={{ fontSize: '25px' }} className="Layout-Sider-Header-Icon" label="New note" />
-          <Tooltip title="New notes" placement="right">
-            <span className="Layout-Sider-Header-add-note" onClick={handleAddNote}>New note</span>
-          </Tooltip>
+          <span className="Layout-Sider-Header-add-note">New note</span>
 
         </div>
         <Menu

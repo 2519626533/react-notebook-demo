@@ -39,6 +39,9 @@
     align-items: center;
     flex-direction: row;
     user-select: none;
+    &:hover {
+      background-color: #4c4c4c;
+    }
     &-Icon {
       transform: rotate(-90deg);
       transition: transform 0.3s ease-in-out;
@@ -101,6 +104,11 @@
       flex: 1;
     }
     .favorites {
+      display: flex;
+      flex-direction: row;
+      flex: 1;
+    }
+    .trash {
       display: flex;
       flex-direction: row;
       flex: 1;

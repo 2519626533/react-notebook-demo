@@ -12,6 +12,13 @@
       .note-list-search {
         border: 1px solid $note-list-border-light;
       }
+      .list-button {
+        color: $note-item-text-color-light;
+        background-color: $note-list-button-bcc-light;
+        &:hover {
+          background-color: $note-list-button-hover-bcc-light;
+        }
+      }
     }
   }
   &[data-theme='dark'] {
@@ -21,6 +28,13 @@
       .note-list-search {
         border: 1px solid $note-list-border-dark;
         background-color: $note-list-search-bcc-dark;
+      }
+      .list-button {
+        color: #d0d0d0;
+        background-color: $note-list-button-bcc-dark;
+        &:hover {
+          background-color: $note-list-button-hover-bcc-dark;
+        }
       }
     }
   }
@@ -38,6 +52,14 @@
         outline: 0;
         box-shadow: 0 0 0 0.2rem #2874a6;
       }
+    }
+    .list-button {
+      margin-left: 0.5rem;
+      padding: 0.7rem;
+      font-weight: 500;
+      border: none;
+      align-items: center;
+      cursor: pointer;
     }
   }
   &-main {

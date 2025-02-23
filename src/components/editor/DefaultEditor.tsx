@@ -1,24 +1,35 @@
 import type { NoteProps } from '@/types/layout'
 import type { CustomEditor, CustomElement } from '@/types/slate'
+import type { Descendant, Operation, Path } from 'slate'
 import { updateNote } from '@/store/note'
 import { getNotes, getSettings } from '@/store/selector'
 import { BlockType, emptyElement } from '@/types/components'
-import { emptyNote } from '@/types/slice'
+import { emptyNote, type noteItem } from '@/types/slice'
 import { SetNodeToDecorations } from '@/utils/decorationsFn'
 import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorHooks'
 import { getActiveNote, getScratchpad } from '@/utils/notes-helps'
 import dayjs from 'dayjs'
+import _ from 'lodash'
 import { useEffect, useMemo, useRef } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { createEditor, type Descendant, Editor, Element, Node, type Operation, Path, Transforms } from 'slate'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { createEditor, Editor, Element, Node, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
 import ToolBar from '../toolbar/ToolBar'
+import 'prismjs/components/prism-javascript'
+import 'prismjs/components/prism-jsx'
+import 'prismjs/components/prism-typescript'
+import 'prismjs/components/prism-tsx'
+import 'prismjs/components/prism-markdown'
+import 'prismjs/components/prism-python'
+import 'prismjs/components/prism-php'
+import 'prismjs/components/prism-sql'
+import 'prismjs/components/prism-java'
 
 // EditArea主体
 const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const editRef = useRef<HTMLDivElement>(null)
-  const { notes, activeNoteId } = useSelector(getNotes)
+  const { notes, activeNoteId } = useSelector(getNotes, shallowEqual)
   const dispatch = useDispatch()
 
   // 创建Slate
@@ -63,35 +74,34 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   // 行号计算函数
   const getLineNumbers = () => {
     let lineNumber = 1
+    const updateNodes: [Path, number][] = []
 
-    Array.from(Editor.nodes(editor, {
+    const blockTypes = new Set(['code-block', 'bulleted-list', 'numbered-list', ...BlockType])
+
+    for (const [node, path] of Editor.nodes<CustomElement>(editor, {
       at: [],
-      match: n =>
-        Element.isElement(n)
-        && (n.type === 'code-block'
-          || n.type === 'bulleted-list'
-          || n.type === 'numbered-list'
-          || BlockType.includes(n.type as string)),
       mode: 'highest',
-    })).sort(([_, aPath], [__, bPath]) => Path.compare(aPath, bPath)).forEach(([node, path]) => {
-      if (Element.isElement(node)) {
-        if (node.type === 'code-block' || node.type === 'bulleted-list' || node.type === 'numbered-list') {
-          node.children.forEach((child, childIndex) => {
-            const childPath = [...path, childIndex]
-            Transforms.setNodes(
-              editor,
-              { lineNumber: lineNumber++ },
-              { at: childPath },
-            )
-          })
-        } else if (BlockType.includes(node.type as string)) {
-          Transforms.setNodes(
-            editor,
-            { lineNumber: lineNumber++ },
-            { at: path },
-          )
-        }
+      match: n => Element.isElement(n) && blockTypes.has(n.type as string),
+    })) {
+      if (node.type === 'code-block' || node.type === 'bulleted-list' || node.type === 'numbered-list') {
+        node.children.forEach((_, childIndex) => {
+          const childPath = [...path, childIndex]
+          updateNodes.push([childPath, lineNumber++])
+        })
+      } else {
+        updateNodes.push([path, lineNumber++])
       }
+    }
+
+    Editor.withoutNormalizing(editor, () => {
+      updateNodes.forEach(([path, newNumber]) => {
+        if (Node.has(editor, path)) {
+          const [node] = Editor.node(editor, path)
+          if ((node as CustomElement).lineNumber !== newNumber) {
+            Transforms.setNodes(editor, { lineNumber: newNumber }, { at: path })
+          }
+        }
+      })
     })
   }
 
@@ -135,6 +145,13 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   //   return null
   // }
 
+  // 更新note内容防抖机制
+  const debounceUpdate = useRef(
+    _.debounce((noteData: noteItem) => {
+      dispatch(updateNote(noteData))
+    }, 500),
+  )
+
   // 监听数据和光标变化
   const editUpdate = (value: Descendant[], editor: CustomEditor) => {
     const edit = editRef.current
@@ -145,7 +162,8 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     )
     if (isAstChange) {
       getLineNumbers()
-      dispatch(updateNote(activeNote
+
+      const noteData = activeNote
         ? {
             id: activeNote?.id,
             title: activeNote.title,
@@ -154,8 +172,11 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
             updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
             scratchpad: !!isScratchpad,
           }
-        : emptyNote))
+        : emptyNote
+
+      debounceUpdate.current(noteData)
     }
+    // 检测光标位置添加高亮行
     if (editor.operations.some(
       (op: Operation) => op.type === 'set_selection' || op.type === 'split_node',
     )) {

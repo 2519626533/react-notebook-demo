@@ -1,3 +1,4 @@
+import type { MouseEventHandler } from 'react'
 import type { CustomElement, CustomFormat, MyNodeTypes } from './slate'
 import type { noteItem } from './slice'
 
@@ -83,7 +84,7 @@ export const emptyElement: CustomElement = {
 }
 
 /**********************************************************************************
-* NoteLink
+* Note
 **********************************************************************************/
 export interface NoteLinkProps {
   uuid: string
@@ -93,4 +94,15 @@ export interface NoteLinkProps {
 
 export interface SearchBarProps {
   searchNotes: (searchValue: string) => void
+}
+
+export interface NoteListButtonProps {
+  label: string
+  handler: MouseEventHandler
+  disabled?: boolean
+  darkTheme: boolean
+}
+
+export interface EmptyEditorProps {
+  darkTheme: boolean
 }

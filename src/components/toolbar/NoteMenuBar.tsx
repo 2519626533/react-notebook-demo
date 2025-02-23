@@ -1,5 +1,5 @@
 import type { NoteProps } from '@/types/layout'
-import { deleteNote, toggleNoteToFavorite } from '@/store/note'
+import { toggleNoteToFavorite, toggleTrashNotes } from '@/store/note'
 import { getNotes, getSettings, getSync } from '@/store/selector'
 import { togglePreviewMode, toggleThemeMode } from '@/store/setting'
 import { sync } from '@/store/sync'
@@ -73,7 +73,7 @@ const NoteMenuBar: React.FC<NoteProps> = ({ isScratchpad }) => {
   // Redux事件/点击事件：移入trash
   const trashNoteHandle = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    dispatch(deleteNote(activeNoteId))
+    dispatch(toggleTrashNotes(activeNoteId))
   }
 
   // 点击事件：Sync事件
@@ -84,66 +84,70 @@ const NoteMenuBar: React.FC<NoteProps> = ({ isScratchpad }) => {
 
   return (
     <div className="note-menu-bar" data-theme={darkTheme ? 'dark' : 'light'}>
-      <nav>
-        {/* 切换主题 */}
-        <button
-          className="note-menu-bar-button"
-          data-theme={darkTheme ? 'dark' : 'light'}
-          type="button"
-          title={isPreviewMode ? 'preview-mode' : 'edit-mode'}
-          onClick={toggleMarkdownMode}
-        >
-          { isPreviewMode ? <EyeOutlined /> : <EditOutlined />}
-        </button>
-        {/* favorites */}
-        {!isScratchpad && (
-          <button
-            className="note-menu-bar-button"
-            data-theme={darkTheme ? 'dark' : 'light'}
-            type="button"
-            title="favorites"
-            onClick={favoriteNoteHandle}
-          >
-            <StarOutlined />
-          </button>
+      <div>
+        {activeNoteId && (
+          <nav>
+            {/* 切换主题 */}
+            <button
+              className="note-menu-bar-button"
+              data-theme={darkTheme ? 'dark' : 'light'}
+              type="button"
+              title={isPreviewMode ? 'preview-mode' : 'edit-mode'}
+              onClick={toggleMarkdownMode}
+            >
+              { isPreviewMode ? <EyeOutlined /> : <EditOutlined />}
+            </button>
+            {/* favorites */}
+            {!isScratchpad && (
+              <button
+                className="note-menu-bar-button"
+                data-theme={darkTheme ? 'dark' : 'light'}
+                type="button"
+                title="favorites"
+                onClick={favoriteNoteHandle}
+              >
+                <StarOutlined />
+              </button>
+            )}
+            {/* delete */}
+            {!isScratchpad && (
+              <button
+                className="note-menu-bar-button"
+                data-theme={darkTheme ? 'dark' : 'light'}
+                type="button"
+                title="delete"
+                onClick={trashNoteHandle}
+              >
+                <DeleteOutlined />
+              </button>
+            )}
+            {/* download */}
+            <button
+              className="note-menu-bar-button"
+              data-theme={darkTheme ? 'dark' : 'light'}
+              type="button"
+              title="download"
+              onClick={handleDownload}
+            >
+              <DownloadOutlined />
+            </button>
+            {/* copy uuid */}
+            <button
+              className="note-menu-bar-button"
+              data-theme={darkTheme ? 'dark' : 'light'}
+              type="button"
+              title="copy uuid"
+              onClick={() => {
+                copyToClipboard(`{{${shortUuid}}}`)
+                setUuidCopiedText(successfulCopyMessage)
+              }}
+            >
+              <CopyOutlined />
+              {uuidCopiedText && <span className="uuid-copy-success">{uuidCopiedText}</span>}
+            </button>
+          </nav>
         )}
-        {/* delete */}
-        {!isScratchpad && (
-          <button
-            className="note-menu-bar-button"
-            data-theme={darkTheme ? 'dark' : 'light'}
-            type="button"
-            title="delete"
-            onClick={trashNoteHandle}
-          >
-            <DeleteOutlined />
-          </button>
-        )}
-        {/* download */}
-        <button
-          className="note-menu-bar-button"
-          data-theme={darkTheme ? 'dark' : 'light'}
-          type="button"
-          title="download"
-          onClick={handleDownload}
-        >
-          <DownloadOutlined />
-        </button>
-        {/* copy uuid */}
-        <button
-          className="note-menu-bar-button"
-          data-theme={darkTheme ? 'dark' : 'light'}
-          type="button"
-          title="copy uuid"
-          onClick={() => {
-            copyToClipboard(`{{${shortUuid}}}`)
-            setUuidCopiedText(successfulCopyMessage)
-          }}
-        >
-          <CopyOutlined />
-          {uuidCopiedText && <span className="uuid-copy-success">{uuidCopiedText}</span>}
-        </button>
-      </nav>
+      </div>
       <nav>
         <LastSync
           datetime={lastSynced}

@@ -3,7 +3,7 @@ import type { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { BLOCK_HOTKEYS, CODEBLOCK_HOTKEY, MARK_HOTKEYS, TextDecorationList } from '@/types/components'
 import { Leaf, MyElement } from '@/utils/editorElement'
 import isHotkey from 'is-hotkey'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { Editor, Element, type NodeEntry, type Range } from 'slate'
 import { isBlockActive, TEXT_ALGIN_TYPES, toggleBlock, toggleCodeBlock, toggleMark } from './editorFunctions'
 // ------------------------------------------------------------------------------------------------------------------------------------
@@ -120,8 +120,29 @@ const useOnKeyDown = (editor: CustomEditor) => {
   }, [editor])
 }
 
+// 自定义定时器
+const noop = () => {}
+const useInterval = (callback: () => void, delay: number | null) => {
+  const savedCallback = useRef(noop)
+
+  useEffect(() => {
+    savedCallback.current = callback
+  }, [callback])
+
+  useEffect(() => {
+    const tick = () => savedCallback.current()
+
+    if (delay) {
+      const id = setInterval(tick, delay)
+
+      return () => clearInterval(id)
+    }
+  }, [delay])
+}
+
 export {
   useDecorate,
+  useInterval,
   useOnKeyDown,
   useRenderElement,
   useRenderLeaf,

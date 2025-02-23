@@ -1,12 +1,13 @@
 import type { noteItem } from '@/types/slice'
-import { setActiveNote, updateNoteTitle, updateSearchValue } from '@/store/note'
+import { pruneEmptyNotes, setActiveNote, updateNoteTitle, updateSearchValue } from '@/store/note'
 import { getNotes, getSettings } from '@/store/selector'
 import { Folder } from '@/utils/enums'
-import { EllipsisOutlined, ReconciliationOutlined, StarOutlined } from '@ant-design/icons'
+import { EllipsisOutlined, ReadOutlined, StarOutlined } from '@ant-design/icons'
 import classnames from 'classnames'
 import { debounce } from 'lodash'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import NoteListButton from '../element/NoteListButton'
 import SearchBar from '../element/SearchBar'
 
 const NoteList = () => {
@@ -31,6 +32,9 @@ const NoteList = () => {
   const filteredNotes = notes
     .filter(filter[activeFolder])
     .filter(titleMatch)
+
+  // 是否显示清空trash按钮
+  const showClearButton: boolean = activeFolder === Folder.TRASH && filteredNotes.length > 0
 
   // 双击事件：editTitle
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -68,6 +72,15 @@ const NoteList = () => {
     <div className="note-list" data-theme={darkTheme ? 'dark' : 'light'}>
       <div className="note-list-header">
         <SearchBar searchNotes={handleSearchNotes} />
+        {showClearButton && (
+          <NoteListButton
+            darkTheme={darkTheme}
+            label="Empty"
+            handler={() => {
+              dispatch(pruneEmptyNotes())
+            }}
+          />
+        )}
       </div>
       <div className="note-list-main" data-theme={darkTheme ? 'dark' : 'light'}>
         {filteredNotes.map((note) => {
@@ -103,7 +116,9 @@ const NoteList = () => {
             >
               <div className="note-item-outer">
                 <div className="note-title">
-                  <div className="favorite-icon"><StarOutlined /></div>
+                  <div className="favorite-icon">
+                    {note.favorite && (<StarOutlined />)}
+                  </div>
                   {editingId === note.id
                     ? (
                         <input
@@ -132,14 +147,16 @@ const NoteList = () => {
                   <EllipsisOutlined />
                 </div>
               </div>
-              <div className="note-item-category">
-                <div className="category-icon">
-                  <ReconciliationOutlined />
+              {!note.trash && (
+                <div className="note-item-category">
+                  <div className="category-icon">
+                    <ReadOutlined />
+                  </div>
+                  <div className="category-text">
+                    Notes
+                  </div>
                 </div>
-                <div className="category-text">
-                  category
-                </div>
-              </div>
+              )}
             </div>
           )
         })}
