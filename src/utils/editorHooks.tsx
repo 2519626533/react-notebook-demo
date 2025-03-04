@@ -40,44 +40,31 @@ const useDecorate = (editor: CustomEditor) => {
         }
       }
     }
+    // 高亮网址、uuid、mdLink
     if (Element.isElement(node) && TextDecorationList.includes(node.type as string)) {
-      let childPath: number[] = path
+      node.children.forEach((child, childIndex) => {
+        const childPath = node.type === 'list-item' ? [...path, childIndex] : path
+        const text = child.text
 
-      node.children.map((child, childIndex) => {
-        if (node.type === 'list-item') {
-          childPath = [...path, childIndex]
-        }
-        // console.log(child, childPath)
-        const urlRegex = /https?:\/\/[^\s)]+|(?<=\]\()[^)]+/
-        const urlMatch = urlRegex.exec(child.text)
-        if (urlMatch) {
-          ranges.push({
-            anchor: { path: childPath, offset: urlMatch.index },
-            focus: { path: childPath, offset: urlMatch.index + urlMatch[0].length },
-            url: true,
-          })
-        }
-        const mdLinkTextRegex = /\[[^\]]+\]/
-        const mdLinkMatch = mdLinkTextRegex.exec(child.text)
-        if (mdLinkMatch) {
-          ranges.push({
-            anchor: { path: childPath, offset: mdLinkMatch.index },
-            focus: { path: childPath, offset: mdLinkMatch.index + mdLinkMatch[0].length },
-            mdLink: true,
-          })
-        }
-        const uuidRegex = /\{\{[a-f0-9-]+\}\}/
-        const uuidMatch = uuidRegex.exec(child.text)
-        if (uuidMatch) {
-          ranges.push({
-            anchor: { path: childPath, offset: uuidMatch.index },
-            focus: { path: childPath, offset: uuidMatch.index + uuidMatch[0].length },
-            uuid: true,
-          })
-        }
-        return null
+        const patterns: { regex: RegExp, props: string }[] = [
+          { regex: /https?:\/\/[^\s)]+|(?<=\]\()[^)]+/, props: 'url' },
+          { regex: /\[[^\]]+\]/, props: 'mdLink' },
+          { regex: /\{\{[a-f0-9-]+\}\}/, props: 'uuid' },
+        ]
+
+        patterns.forEach(({ regex, props }) => {
+          const match = regex.exec(text)
+          if ((match)) {
+            ranges.push({
+              anchor: { path: childPath, offset: match.index },
+              focus: { path: childPath, offset: match.index + match[0].length },
+              [props]: true,
+            })
+          }
+        })
       })
     }
+    // console.log(ranges)
     return ranges
   }, [editor.nodeToDecorations])
 }

@@ -176,43 +176,6 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
 
       debounceUpdate.current(noteData)
     }
-    // 检测光标位置添加高亮行
-    if (editor.operations.some(
-      (op: Operation) => op.type === 'set_selection' || op.type === 'split_node',
-    )) {
-      if (!editor.selection)
-        return
-      const nodeEntry = Editor.above(editor, {
-        at: editor.selection.anchor,
-        match: n => Editor.isBlock(editor, n as CustomElement),
-      })
-      if (!nodeEntry)
-        return
-      const [node] = nodeEntry
-      try {
-        const domNode = ReactEditor.toDOMNode(editor, node)
-        if (domNode) {
-          const allLines = edit.querySelectorAll('[data-slate-node="element"]')
-          allLines.forEach((line) => {
-            line.classList.remove('active-line')
-          })
-          domNode.classList.add('active-line')
-        }
-      } catch {
-        setTimeout(() => {
-          try {
-            const domNode = ReactEditor.toDOMNode(editor, node)
-            if (domNode) {
-              const allLines = edit.querySelectorAll('[data-slate-node="element"]')
-              allLines.forEach((line) => {
-                line.classList.remove('active-line')
-              })
-              domNode.classList.add('active-line')
-            }
-          } catch {}
-        }, 50)
-      }
-    }
   }
 
   //  自定义复制事件

@@ -100,8 +100,9 @@ const LayoutPage = () => {
       }],
       // favorite: false,
       // trash: false,
-      createdAt: dayjs().format('YYYY-MM-DD HH-mm-ss'),
-      updatedAt: dayjs().format('YYYY-MM-DD HH-mm-ss'),
+      createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      category: '',
     }
     dispatch(addNote(newNote))
   }

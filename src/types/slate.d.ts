@@ -5,93 +5,6 @@ import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
 // 编辑样式类型
-export type BlockQuoteElement = {
-  type: 'block-quote'
-  align?: string
-  children: Descendant[]
-  lineNumber?: number
-}
-
-export type NumberedListElement = {
-  type: 'numbered-list'
-  align?: string
-  children: Descendant[]
-  lineNumber?: number
-}
-
-export type BulletedListElement = {
-  type: 'bulleted-list'
-  align?: string
-  children: Descendant[]
-  lineNumber?: number
-}
-
-export type CheckListItemElement = {
-  type: 'check-list-item'
-  checked: boolean
-  children: Descendant[]
-  lineNumber?: number
-}
-
-export type EditableVoidElement = {
-  type: 'editable-void'
-  children: Descendant[]
-  lineNumber?: number
-}
-
-export type HeadingElement = {
-  type: 'heading'
-  align?: string
-  children: Descendant[]
-  lineNumber?: number
-}
-
-export type HeadingTwoElement = {
-  type: 'heading-two'
-  align?: string
-  children: Descendant[]
-  lineNumber?: number
-}
-
-export type ImageElement = {
-  type: 'image'
-  url: string
-  children: Descendant[]
-  lineNumber?: number
-}
-
-export type LinkElement = { type: 'link', url: string, children: Descendant[], lineNumber?: number }
-
-export type ButtonElement = { type: 'button', children: Descendant[], lineNumber?: number }
-
-export type BadgeElement = { type: 'badge', children: Descendant[], lineNumber?: number }
-
-export type ListItemElement = { type: 'list-item', children: Descendant[], lineNumber?: number }
-
-export type MentionElement = {
-  type: 'mention'
-  character: string
-  children: CustomText[]
-  lineNumber?: number
-}
-
-export type ParagraphElement = {
-  type: 'paragraph'
-  align?: string
-  children: Descendant[]
-  lineNumber?: number
-}
-
-export type TableElement = { type: 'table', children: TableRow[], lineNumber?: number }
-
-export type TableCellElement = { type: 'table-cell', children: CustomText[], lineNumber?: number }
-
-export type TableRowElement = { type: 'table-row', children: TableCell[], lineNumber?: number }
-
-export type TitleElement = { type: 'title', children: Descendant[], lineNumber?: number }
-
-export type VideoElement = { type: 'video', url: string, children: EmptyText[], lineNumber?: number }
-
 export type CodeBlockElement = {
   type: 'code-block'
   language: string
@@ -106,25 +19,6 @@ export type CodeLineElement = {
 }
 
 type CustomElement =
-  | BlockQuoteElement
-  | NumberedListElement
-  | BulletedListElement
-  | CheckListItemElement
-  | EditableVoidElement
-  | HeadingElement
-  | HeadingTwoElement
-  | ImageElement
-  | LinkElement
-  | ButtonElement
-  | BadgeElement
-  | ListItemElement
-  | MentionElement
-  | ParagraphElement
-  | TableElement
-  | TableRowElement
-  | TableCellElement
-  | TitleElement
-  | VideoElement
   | CodeBlockElement
   | CodeLineElement
   | { type: null, children: Descendant[], lineNumber?: number }
@@ -168,6 +62,7 @@ export type CustomText = {
   url?: boolean
   mdLink?: boolean
   uuid?: boolean
+  activeLine?: boolean
 }
 
 export type EmptyText = {
@@ -187,10 +82,12 @@ export type CustomFormat =
   | BlockType
   | CodeType
 
-export type CustomEditor = BaseEditor &
+export type CustomEditor =
+  BaseEditor &
   ReactEditor &
-  HistoryEditor & {
-    nodeToDecorations?: Map<Element, Range[]>
+  HistoryEditor &
+  {
+    nodeToDecorations?: Map<CustomElement, Range[]>
   }
 
 // Slate Button type

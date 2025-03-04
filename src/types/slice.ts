@@ -20,7 +20,7 @@ export interface noteItem {
   scratchpad?: boolean
   favorite?: boolean
   trash?: boolean
-  category?: string
+  category: string | null
 }
 
 export const emptyNote: noteItem = {
@@ -29,6 +29,7 @@ export const emptyNote: noteItem = {
   content: [],
   createdAt: '',
   updatedAt: '',
+  category: '',
 }
 
 /*

@@ -1,7 +1,8 @@
-import type { CodeLineElement, CustomElement, MyNodeTypes } from '@/types/slate'
+import type { CodeLineElement, CustomElement, CustomText, MyNodeTypes } from '@/types/slate'
 import { BlockType, myRemarkSlateNodeTypes } from '@/types/components'
 import { type OptionType, serialize } from 'remark-slate'
 import { type Descendant, Element, Node } from 'slate'
+import { convertSlateToRemarkType } from './convertType'
 
 const remarkSlateOpts: OptionType<MyNodeTypes> & { nodeTypes: MyNodeTypes } = {
   nodeTypes: myRemarkSlateNodeTypes,
@@ -9,7 +10,7 @@ const remarkSlateOpts: OptionType<MyNodeTypes> & { nodeTypes: MyNodeTypes } = {
 
 export const slateToMd = (content: Descendant[]) => {
   const markdownContent: string = (content as CustomElement[])
-    .filter(value => value.children.some(child => child.text !== ''))
+    .filter(value => value.children.some(child => Element.isElement(child) ? child.children : child.text !== ''))
     .map((value) => {
       if (Element.isElement(value) && BlockType.includes(value.type as string)) {
         if (value.type === 'code-block') {
@@ -31,10 +32,11 @@ export const slateToMd = (content: Descendant[]) => {
               return modifiedCodeLine
             }),
           }
-          return serialize(modifiedCodeBlock, remarkSlateOpts)
+          return serialize(convertSlateToRemarkType(modifiedCodeBlock), remarkSlateOpts)
         } else if (value.type === 'numbered-list' || value.type === 'bulleted-list') {
           const liItem = value.children.map((child) => {
-            let tempItem = serialize(child, remarkSlateOpts)
+            const convertedChild = convertSlateToRemarkType(child as CustomElement)
+            let tempItem = serialize(convertedChild, remarkSlateOpts)
             if (!tempItem?.endsWith('\n')) {
               tempItem = `${tempItem}\n`
             }
@@ -43,7 +45,7 @@ export const slateToMd = (content: Descendant[]) => {
           ).join('')
           return liItem
         } else {
-          return serialize(value, remarkSlateOpts)
+          return serialize(convertSlateToRemarkType(value), remarkSlateOpts)
         }
       } else {
         return Node.string(value)

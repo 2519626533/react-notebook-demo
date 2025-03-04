@@ -15,19 +15,28 @@ const mergeMaps = <K, V>(...maps: Map<K, V>[]) => {
   return map
 }
 
+const codeBlockDecorationCache = new WeakMap
+<Element, { text: string, nodeToDecorations: Map<Element, Range[]> }>()
+
 // 获取孩子节点装饰范围
 const getChildNodeToDecorations = ([
   block,
   blockPath,
 ]: NodeEntry<CodeBlockElement>) => {
+  const text = block.children.map(line => Node.string(line)).join('\n')
+
+  const cached = codeBlockDecorationCache.get(block)
+
+  if (cached && cached.text === text) {
+    return cached.nodeToDecorations
+  }
+
   const nodeToDecorations = new Map<Element, Range[]>()
 
-  const text = block.children.map(line => Node.string(line)).join('\n')
   const language = block.language || 'plaintext'
   const tokens = Prism.tokenize(text, Prism.languages[language])
 
   const normalizedTokens = normalizeTokens(tokens)
-  // console.log(normalizedTokens)
   const blockChildren = block.children as Element[]
 
   for (let index = 0; index < normalizedTokens.length; index++) {
@@ -59,6 +68,7 @@ const getChildNodeToDecorations = ([
       start = end
     }
   }
+  codeBlockDecorationCache.set(block, { text, nodeToDecorations })
   return nodeToDecorations
 }
 
@@ -69,7 +79,7 @@ const SetNodeToDecorations = () => {
     Editor.nodes(editor, {
       at: [],
       mode: 'highest',
-      match: n => Element.isElement(n) && n.type === 'code-block',
+      match: n => Element.isElement(n) && n.type === 'code-block' && 'language' in n,
     }),
   )
 

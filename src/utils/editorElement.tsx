@@ -1,8 +1,8 @@
-import type { CodeBlockElement, CustomText } from '@/types/slate'
+import type { CodeBlockElement, CustomElement, CustomText } from '@/types/slate'
 import LanguageSelector from '@/components/element/LanguageSelector'
 import { getSettings } from '@/store/selector'
 import { useSelector } from 'react-redux'
-import { Transforms } from 'slate'
+import { Editor, Path, Transforms } from 'slate'
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
 
 // Element
@@ -13,6 +13,22 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
   const style: React.CSSProperties = { textAlign: align }
   const lineNumber = element.lineNumber || ''
   const isEmpty = lineNumber === ''
+
+  const path = ReactEditor.findPath(editor, element)
+  let isActive = false
+
+  if (editor.selection) {
+    const blockEntry = Editor.above(editor, {
+      at: editor.selection,
+      match: n => Editor.isBlock(editor, n as CustomElement),
+    })
+    if (blockEntry) {
+      const [, blockPath] = blockEntry
+      if (Path.equals(path, blockPath)) {
+        isActive = true
+      }
+    }
+  }
 
   return (
     <div className="element-container">
@@ -31,6 +47,7 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
             return (
               (
                 <h1
+                  className={isActive ? 'active-line' : ''}
                   style={style}
                   {...attributes}
                   data-theme={darkTheme ? 'dark' : 'light'}
@@ -42,7 +59,12 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
           case 'heading-two':
             return (
               (
-                <h2 style={style} {...attributes} data-theme={darkTheme ? 'dark' : 'light'}>
+                <h2
+                  className={isActive ? 'active-line' : ''}
+                  style={style}
+                  {...attributes}
+                  data-theme={darkTheme ? 'dark' : 'light'}
+                >
                   {children}
                 </h2>
               )
@@ -50,6 +72,7 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
           case 'block-quote':
             return (
               <blockquote
+                className={isActive ? 'active-line' : ''}
                 style={style}
                 {...attributes}
                 data-theme={darkTheme ? 'dark' : 'light'}
@@ -77,6 +100,7 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
             return (
               (
                 <li
+                  className={isActive ? 'active-line' : ''}
                   style={style}
                   {...attributes}
                   data-theme={darkTheme ? 'dark' : 'light'}
@@ -112,6 +136,7 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
           case 'code-line':
             return (
               <div
+                className={isActive ? 'active-line' : ''}
                 {...attributes}
                 style={{ position: 'relative' }}
                 data-theme={darkTheme ? 'dark' : 'light'}
@@ -122,7 +147,12 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
           default:
             return (
               (
-                <div style={style} {...attributes} data-theme={darkTheme ? 'dark' : 'light'}>
+                <div
+                  className={isActive ? 'active-line' : ''}
+                  style={style}
+                  {...attributes}
+                  data-theme={darkTheme ? 'dark' : 'light'}
+                >
                   {children}
                 </div>
               )
@@ -166,6 +196,9 @@ const Leaf: React.FC<RenderLeafProps & { leaf: CustomText }> = ({ attributes, ch
           fontStyle: 'italic',
           color: '#1ABC9C',
         }),
+        // ...(leaf.activeLine && {
+        //   backgroundColor: 'red',
+        // }),
       }}
     >
       {children}
