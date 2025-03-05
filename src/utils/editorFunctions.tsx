@@ -1,5 +1,6 @@
 import type { CustomEditor, CustomFormat, CustomText, ListType, MarkType, TextAlginType } from '@/types/slate'
 import { Editor, Element, Element as SlateElement, Transforms } from 'slate'
+import { detectLanguage } from './language-detector'
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -94,9 +95,24 @@ const toggleCodeBlock = (editor: CustomEditor, isActive: boolean) => {
       { match: n => Element.isElement(n) && n.type === 'code-line' },
     )
   } else {
+    const matches = Array.from(Editor.nodes(editor, {
+      match: n => Element.isElement(n) && n.type === 'paragraph',
+    }))
+
+    const codeText = matches.map((match) => {
+      return match[0].children[0].text
+    })
+      .join('\n')
+    const detectedLanguage = detectLanguage(codeText)
+    console.log(detectedLanguage)
+
     Transforms.wrapNodes(
       editor,
-      { type: 'code-block', language: 'jsx', children: [{ text: '' }] },
+      {
+        type: 'code-block',
+        language: detectedLanguage.language,
+        children: [{ text: '' }],
+      },
       {
         match: n => Element.isElement(n) && n.type === 'paragraph',
         split: true,

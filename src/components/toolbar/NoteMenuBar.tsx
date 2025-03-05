@@ -84,7 +84,7 @@ const NoteMenuBar: React.FC<NoteProps> = ({ isScratchpad }) => {
 
   return (
     <div className="note-menu-bar" data-theme={darkTheme ? 'dark' : 'light'}>
-      <div style={{ minWidth: '205px' }}>
+      <div>
         {activeNoteId && (
           <nav>
             {/* 切换主题 */}
