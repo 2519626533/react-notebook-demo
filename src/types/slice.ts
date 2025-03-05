@@ -55,6 +55,7 @@ export interface SyncState {
   syncing: boolean
   lastSynced: string
   error: string
+  ServiceStatus: 'online' | 'offline'
 }
 
 // api
@@ -71,4 +72,10 @@ export interface SyncPayload {
 export interface SyncAction {
   type: typeof sync.type
   payload: SyncPayload
+}
+
+type SyncActionType = 'CREATE' | 'UPDATE' | 'DELETE'
+export interface SyncSagaAction {
+  type: SyncActionType
+  payload: noteItem
 }

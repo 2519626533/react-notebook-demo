@@ -2,7 +2,7 @@ import type { GetLocalStorage, noteItem, PromiseCallback, SettingState, SyncPayl
 import dayjs from 'dayjs'
 import { v4 as uuid } from 'uuid'
 
-const scratchpadNote: noteItem = {
+export const scratchpadNote: noteItem = {
   id: uuid(),
   title: 'scratchpad',
   content: [{
@@ -19,7 +19,7 @@ const scratchpadNote: noteItem = {
   updatedAt: dayjs().format(),
 }
 
-const welcomeNote: noteItem = {
+export const welcomeNote: noteItem = {
   id: uuid(),
   title: 'Welcome to TakeNote!',
   content: [{

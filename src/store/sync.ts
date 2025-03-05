@@ -1,11 +1,13 @@
 import type { SyncPayload, SyncState } from '@/types/slice'
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import dayjs from 'dayjs'
 
 const syncInitialState: SyncState = {
   pendingSync: false,
   syncing: false,
   error: '',
-  lastSynced: '',
+  lastSynced: dayjs().format(),
+  ServiceStatus: 'offline',
 }
 
 const syncStore = createSlice({
@@ -26,6 +28,9 @@ const syncStore = createSlice({
       state.error = payload
       state.syncing = false
     },
+    updateServiceStatus(state, { payload }: PayloadAction<'online' | 'offline'>) {
+      state.ServiceStatus = payload
+    },
   },
 })
 
@@ -35,4 +40,5 @@ export const {
   setPendingSync,
   syncSuccess,
   syncError,
+  updateServiceStatus,
 } = syncStore.actions

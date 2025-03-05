@@ -54,7 +54,6 @@ sequelize.sync({ force: false }).then(async () => {
   }
 })
 
-// 在server.js的接口定义之前添加
 app.get('/', (req, res) => {
   res.send(`
     <h1>Server is running</h1>
@@ -66,6 +65,15 @@ app.get('/', (req, res) => {
       <li>POST /api/detect-language</li>
     </ul>
   `)
+})
+
+// 检测服务器是否可连通
+app.get('/api/health', (req, res) => {
+  try {
+    res.json({ status: 'online' })
+  } catch {
+    res.json({ status: 'offline' })
+  }
 })
 
 // Notes接口

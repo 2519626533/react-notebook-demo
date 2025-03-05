@@ -1,5 +1,6 @@
 import type { APINoteItem } from '@/types/api'
 import type { noteItem } from '@/types/slice'
+import { scratchpadNote, welcomeNote } from './local'
 import request from './request'
 
 // 转换服务器端数据到前端类型
@@ -28,16 +29,6 @@ const transformToAPINote = (note: noteItem): APINoteItem => ({
   category: note.category || null,
 })
 
-export const getAllNotesApi = async (): Promise<noteItem[]> => {
-  try {
-    const response = await request.get<APINoteItem[]>('/notes')
-    return response.data.map(transformNote)
-  } catch (error) {
-    console.error('获取笔记列表失败:', error)
-    throw new Error('Failed to fetch notes')
-  }
-}
-
 export const createNoteApi = async (noteData: noteItem): Promise<noteItem> => {
   try {
     const payload = transformToAPINote(noteData)
@@ -46,6 +37,22 @@ export const createNoteApi = async (noteData: noteItem): Promise<noteItem> => {
   } catch (error) {
     console.error('创建笔记失败:', error)
     throw new Error('Failed to create note')
+  }
+}
+
+export const getAllNotesApi = async (): Promise<noteItem[]> => {
+  try {
+    let response = await request.get<APINoteItem[]>('/notes')
+    if (!response.data[0]) {
+      await createNoteApi(scratchpadNote)
+      await createNoteApi(welcomeNote)
+
+      response = await request.get<APINoteItem[]>('/notes')
+    }
+    return response.data.map(transformNote)
+  } catch (error) {
+    console.error('获取笔记列表失败:', error)
+    throw new Error('Failed to fetch notes')
   }
 }
 

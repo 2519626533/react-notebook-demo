@@ -17,6 +17,13 @@
   &[data-theme='dark'] {
     background-color: $note-menu-bar-bcc-dark;
   }
+  .service-status {
+    cursor: default;
+    user-select: none;
+    &[data-theme='dark'] {
+      color: $note-menu-bar-last-synced-color-dark;
+    }
+  }
   nav {
     display: flex;
     justify-content: center;

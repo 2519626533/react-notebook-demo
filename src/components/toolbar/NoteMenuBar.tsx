@@ -14,7 +14,7 @@ import LastSync from '../element/LastSync'
 const NoteMenuBar: React.FC<NoteProps> = ({ isScratchpad }) => {
   // Selector
   const { notes, activeNoteId } = useSelector(getNotes)
-  const { syncing, lastSynced, pendingSync } = useSelector(getSync)
+  const { syncing, lastSynced, pendingSync, ServiceStatus } = useSelector(getSync)
   const dispatch = useDispatch()
 
   const activeNote = useMemo(() => {
@@ -84,7 +84,7 @@ const NoteMenuBar: React.FC<NoteProps> = ({ isScratchpad }) => {
 
   return (
     <div className="note-menu-bar" data-theme={darkTheme ? 'dark' : 'light'}>
-      <div>
+      <div style={{ minWidth: '205px' }}>
         {activeNoteId && (
           <nav>
             {/* 切换主题 */}
@@ -148,6 +148,13 @@ const NoteMenuBar: React.FC<NoteProps> = ({ isScratchpad }) => {
           </nav>
         )}
       </div>
+      <div
+        className="service-status"
+        data-theme={darkTheme ? 'dark' : 'light'}
+        contentEditable={false}
+      >
+        {ServiceStatus === 'online' ? '🟢 在线' : '🔴 离线'}
+      </div>
       <nav>
         <LastSync
           datetime={lastSynced}
@@ -159,7 +166,7 @@ const NoteMenuBar: React.FC<NoteProps> = ({ isScratchpad }) => {
           className="note-menu-bar-button"
           data-theme={darkTheme ? 'dark' : 'light'}
           type="button"
-          title="refresh"
+          title="sync"
           onClick={syncHandle}
         >
           <ReloadOutlined />

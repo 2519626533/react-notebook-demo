@@ -4,11 +4,12 @@ import { requestNotes, requestSettings, saveSettings, saveState } from '@/apis/l
 import { createNoteApi, deleteNoteApi, getAllNotesApi, updateNoteApi } from '@/apis/notes'
 import { getAllSettingsApi, updateSettingApi } from '@/apis/settings'
 import { addNote, loadNote, loadNotesError, loadNotesSuccess, pruneEmptyNotes, updateNote } from '@/store/note'
-import { getNotes, getSettings } from '@/store/selector'
+import { getNotes, getSettings, getSync } from '@/store/selector'
 import { loadSetting, loadSettingsError, loadSettingSuccess, togglePreviewMode, toggleThemeMode } from '@/store/setting'
 import { sync, syncError, syncSuccess } from '@/store/sync'
 import dayjs from 'dayjs'
 import { all, call, put, select, takeLatest } from 'redux-saga/effects'
+import { handleSync } from './sync-saga'
 
 /*
 * 获取数据/设置流程：
@@ -23,52 +24,54 @@ import { all, call, put, select, takeLatest } from 'redux-saga/effects'
 // 初始化获取notes
 function* fetchNotes(): SagaIterator {
   try {
-    const serverNotes: noteItem[] = yield call(getAllNotesApi)
-    yield put(loadNotesSuccess({ notes: serverNotes }))
+    const { ServiceStatus } = yield select(getSync)
+    if (ServiceStatus === 'online') {
+      yield call(handleSync)
+      const serverNotes: noteItem[] = yield call(getAllNotesApi)
+      yield put(loadNotesSuccess({ notes: serverNotes }))
 
-    yield call(saveState, { notes: serverNotes })
-  } catch (error) {
-    console.error('服务器同步失败，使用本地数据:', error)
-
-    try {
+      yield call(saveState, { notes: serverNotes })
+    } else {
       const localNotes: noteItem[] = yield call(requestNotes)
       yield put(loadNotesSuccess({ notes: localNotes }))
-    } catch (localError) {
-      yield put(loadNotesError((localError as Error).message))
     }
+  } catch (Error) {
+    yield put(loadNotesError((Error as Error).message))
   }
 }
 
 // 初始化获取settings
 function* fetchSettings(): SagaIterator {
   try {
-    const serverSettings = yield call(getAllSettingsApi)
-    yield put(loadSettingSuccess(serverSettings))
+    const { ServiceStatus } = yield select(getSync)
+    if (ServiceStatus === 'online') {
+      const serverSettings = yield call(getAllSettingsApi)
+      yield put(loadSettingSuccess(serverSettings))
 
-    yield call(saveSettings, serverSettings)
-  } catch (error) {
-    console.error('设置同步失败，使用本地设置:', error)
-
-    try {
+      yield call(saveSettings, serverSettings)
+    } else {
       const localSetting = yield call(requestSettings)
       yield put(loadSettingSuccess(localSetting))
-    } catch {
-      yield put(loadSettingsError())
     }
+  } catch {
+    yield put(loadSettingsError())
   }
 }
 
 // 保存notes
 function* syncData({ payload }: SyncAction) {
   try {
+    const { ServiceStatus } = yield select(getSync)
     yield saveState(payload)
 
-    const { notes } = payload
-    yield all(notes.map(note =>
-      note.id
-        ? call(updateNoteApi, note.id, note)
-        : call(createNoteApi, note),
-    ))
+    if (ServiceStatus === 'online') {
+      const { notes } = payload
+      yield all(notes.map(note =>
+        note.id
+          ? call(updateNoteApi, note.id, note)
+          : call(createNoteApi, note),
+      ))
+    }
 
     yield put(syncSuccess(dayjs().format()))
   } catch (error) {
@@ -79,6 +82,11 @@ function* syncData({ payload }: SyncAction) {
 // 处理note CRUD的服务器同步
 function* syncNoteAction(action: { type: string, payload: noteItem }) {
   try {
+    const { ServiceStatus } = yield select(getSync)
+    if (ServiceStatus !== 'online') {
+      return
+    }
+
     switch (action.type) {
       case addNote.type:
         yield call(createNoteApi, action.payload)
@@ -98,9 +106,10 @@ function* syncNoteAction(action: { type: string, payload: noteItem }) {
 }
 
 // 保存settings
-function* syncSettings(action: { type: string }): Generator<any, void, unknown> {
+function* syncSettings(action: { type: string }): Generator<any, void> {
   try {
     const settings = yield select(getSettings)
+    const { ServiceStatus } = yield select(getSync)
 
     const [key, value]: [key: keyof SettingState, value: boolean]
       = action.type === toggleThemeMode.type
@@ -109,7 +118,9 @@ function* syncSettings(action: { type: string }): Generator<any, void, unknown> 
 
     yield saveSettings(settings as SettingState)
 
-    yield call(() => updateSettingApi(key, value))
+    if (ServiceStatus === 'online') {
+      yield call(() => updateSettingApi(key, value))
+    }
   } catch (error) {
     console.error('设置同步失败:', error)
   }

@@ -1,10 +1,11 @@
 import type { MenuItems } from '@/types/layout'
 import type { noteItem } from '@/types/slice'
 import type { MenuInfo } from 'rc-menu/es/interface'
+import request from '@/apis/request'
 import { addNote, loadNote, swapFolder } from '@/store/note'
-import { getNotes } from '@/store/selector'
+import { getNotes, getSync } from '@/store/selector'
 import { loadSetting } from '@/store/setting'
-import { sync } from '@/store/sync'
+import { sync, updateServiceStatus } from '@/store/sync'
 import { useInterval } from '@/utils/editorHooks'
 import { FolderToKeyMap, KeyToFolderMap } from '@/utils/enums'
 import { DeleteOutlined, FormOutlined, PlusCircleTwoTone, ReconciliationOutlined, StarOutlined } from '@ant-design/icons'
@@ -45,8 +46,21 @@ const LayoutPage = () => {
 
   // TakeNote应用初始化
   useEffect(() => {
-    dispatch(loadNote())
-    dispatch(loadSetting())
+    const init = async () => {
+      try {
+        const { data } = await request.get<{ status: 'online' | 'offline' }>('/health')
+        if (data.status === 'online') {
+          dispatch(updateServiceStatus(data.status))
+        } else {
+          dispatch(updateServiceStatus('offline'))
+        }
+      } catch {
+        dispatch(updateServiceStatus('offline'))
+      }
+      dispatch(loadNote())
+      dispatch(loadSetting())
+    }
+    init()
   }, [])
 
   // 定时自动sync
