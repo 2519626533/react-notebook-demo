@@ -2,7 +2,6 @@ import path from 'node:path'
 import process from 'node:process'
 import cors from 'cors'
 import express from 'express'
-import hljs from 'highlight.js'
 import { DataTypes, Sequelize } from 'sequelize'
 
 const app = express()
@@ -168,25 +167,6 @@ app.post('/api/settings', async (req, res) => {
     })
   } catch (error) {
     res.status(400).json({ error: error.message })
-  }
-})
-
-// 编程语言检测接口
-app.post('/api/detect-language', async (req, res) => {
-  try {
-    const { code } = req.body
-    if (!code) {
-      return res.status(400).json({ error: 'Code text is required' })
-    }
-
-    const result = hljs.highlightAuto(code)
-    res.json({
-      language: result.language || 'unknown',
-      relevance: result.relevance,
-      value: result.value,
-    })
-  } catch (error) {
-    res.status(500).json({ error: error.message })
   }
 })
 

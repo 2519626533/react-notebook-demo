@@ -10,11 +10,11 @@ import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/ut
 import { getActiveNote, getScratchpad } from '@/utils/notes-helps'
 import dayjs from 'dayjs'
 import _ from 'lodash'
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { createEditor, Editor, Element, Node, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
-import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
+import { Editable, Slate, withReact } from 'slate-react'
 import ToolBar from '../toolbar/ToolBar'
 import 'prismjs/components/prism-javascript'
 import 'prismjs/components/prism-jsx'
@@ -37,7 +37,7 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     const editor = withHistory(withReact(createEditor()))
     editor.nodeToDecorations = new Map()
     return editor
-  }, [activeNoteId])
+  }, [])
 
   // 初始化数据
   const activeNote = useMemo(() => {
@@ -72,7 +72,7 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const { darkTheme } = useSelector(getSettings)
 
   // 行号计算函数
-  const getLineNumbers = () => {
+  const getLineNumbers = useCallback(() => {
     let lineNumber = 1
     const updateNodes: [Path, number][] = []
 
@@ -103,12 +103,12 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
         }
       })
     })
-  }
+  }, [editor])
 
   // 动态渲染line-number
   useEffect(() => {
     getLineNumbers()
-  }, [editor, value])
+  }, [editor, getLineNumbers, value])
 
   // 动态引入code-block主题
   useEffect(() => {
@@ -122,17 +122,24 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     }
   }, [darkTheme])
 
-  // // 修改 useEffect 逻辑，直接重置 editor 的 children 和 selection
-  // useEffect(() => {
-  //   if (activeNote) {
-  //     // 强制重置选区
-  //     Transforms.deselect(editor)
-  //     // 清空操作历史
-  //     editor.history = { undos: [], redos: [] }
-  //   }
-  // }, [activeNoteId])
+  //
+  useEffect(() => {
+    if (activeNote) {
+      Transforms.delete(editor, {
+        at: {
+          anchor: Editor.start(editor, []),
+          focus: Editor.end(editor, []),
+        },
+      })
+      Transforms.insertFragment(editor, value)
+      // 强制重置选区
+      Transforms.deselect(editor)
+      // 清空操作历史
+      editor.history = { undos: [], redos: [] }
+    }
+  }, [activeNoteId])
 
-  // 计时器延迟渲染toolBar
+  // // 计时器延迟渲染toolBar
   // useEffect(() => {
   //   dispatch(updateIsEditorReady(false))
   //   const timerOut = setTimeout(() => {
@@ -140,10 +147,6 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   //   }, 0)
   //   return () => clearTimeout(timerOut)
   // }, [activeNoteId, editor, dispatch])
-
-  // if (!isScratchpad && !activeNote) {
-  //   return null
-  // }
 
   // 更新note内容防抖机制
   const debounceUpdate = useRef(
@@ -163,7 +166,7 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     if (isAstChange) {
       getLineNumbers()
 
-      const noteData = activeNote
+      const noteData: noteItem = activeNote
         ? {
             id: activeNote?.id,
             title: activeNote.title,
@@ -171,7 +174,7 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
             createdAt: activeNote.createdAt,
             updatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
             scratchpad: !!isScratchpad,
-          }
+          } as noteItem
         : emptyNote
 
       debounceUpdate.current(noteData)
@@ -202,7 +205,7 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     <div className="notebook">
       <div className="slate" data-theme={darkTheme ? 'dark' : 'light'}>
         <Slate
-          key={activeNoteId}
+          // key={activeNoteId}
           editor={editor}
           initialValue={value}
           onChange={(value) => {

@@ -3,11 +3,11 @@ import type { noteItem } from '@/types/slice'
 import type { MenuInfo } from 'rc-menu/es/interface'
 import request from '@/apis/request'
 import { addNote, loadNote, swapFolder } from '@/store/note'
-import { getNotes, getSync } from '@/store/selector'
+import { getNotes } from '@/store/selector'
 import { loadSetting } from '@/store/setting'
 import { sync, updateServiceStatus } from '@/store/sync'
 import { useInterval } from '@/utils/editorHooks'
-import { FolderToKeyMap, KeyToFolderMap } from '@/utils/enums'
+import { KeyToFolderMap } from '@/utils/enums'
 import { DeleteOutlined, FormOutlined, PlusCircleTwoTone, ReconciliationOutlined, StarOutlined } from '@ant-design/icons'
 import { Layout, Menu } from 'antd'
 import dayjs from 'dayjs'
@@ -39,7 +39,6 @@ const items: MenuItems[] = [{
 const LayoutPage = () => {
   // Redux state
   const { notes, activeFolder } = useSelector(getNotes)
-  const [selectedKey, setSelectedKey] = useState(FolderToKeyMap[activeFolder])
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const location = useLocation()
@@ -61,40 +60,27 @@ const LayoutPage = () => {
       dispatch(loadSetting())
     }
     init()
-  }, [])
+  }, [dispatch])
 
   // 定时自动sync
   useInterval(() => {
     dispatch(sync({ notes }))
   }, 30000)
 
-  // 路由更新时同步activeFolder
+  const selectedKey = location.pathname
+  // activeFolder更新时同步路由
   useEffect(() => {
     const path = location.pathname
     const newFolder = KeyToFolderMap[path]
 
     if (newFolder && newFolder !== activeFolder) {
       dispatch(swapFolder({ folder: newFolder }))
-      setSelectedKey(path)
     }
-  }, [location.pathname, dispatch])
-
-  // activeFolder更新时同步路由
-  useEffect(() => {
-    const newPath = FolderToKeyMap[activeFolder]
-    if (selectedKey !== newPath) {
-      setSelectedKey(newPath)
-      navigate(newPath)
-    }
-  }, [activeFolder, navigate, selectedKey])
+  }, [location.pathname, activeFolder, navigate, dispatch])
 
   const onSelect = (e: MenuInfo): void => {
     const { key } = e
-    const newFolder = KeyToFolderMap[key]
-
-    if (newFolder) {
-      dispatch(swapFolder({ folder: newFolder }))
-    }
+    navigate(key)
   }
 
   const [collapsed, setCollapsed] = useState(false)

@@ -1,6 +1,8 @@
 import type { CodeBlockElement, CustomElement, CustomText } from '@/types/slate'
 import LanguageSelector from '@/components/element/LanguageSelector'
 import { getSettings } from '@/store/selector'
+import _ from 'lodash'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Editor, Path, Transforms } from 'slate'
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
@@ -31,7 +33,10 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
   }
 
   return (
-    <div className="element-container">
+    <div
+      className="element-container"
+      data-line-index={element.lineNumber}
+    >
       {/* 行号容器 */}
       {!isEmpty && (
         <div className="line-wrapper" contentEditable={false}>
@@ -162,7 +167,6 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
     </div>
   )
 }
-
 // 定义一个 React 组件来渲染带有粗体文本的叶子
 const Leaf: React.FC<RenderLeafProps & { leaf: CustomText }> = ({ attributes, children, leaf }) => {
   const { text, ...rest } = leaf
