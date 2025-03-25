@@ -24,6 +24,12 @@
   }
 
   // h1&&h2
+  h1[data-slate-node='element'] {
+    margin: 14px 0px;
+  }
+  h2[data-slate-node='element'] {
+    margin: 12px 0px;
+  }
   h1[data-slate-node='element'],
   h2[data-slate-node='element'] {
     cursor: auto;
@@ -44,8 +50,22 @@
     padding: 5px 2px;
     font-size: 15px;
     font-weight: normal;
-    font-family: inherit;
+    font-family:
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      Oxygen,
+      Ubuntu,
+      Cantarell,
+      'Open Sans',
+      'Helvetica Neue',
+      sans-serif;
     cursor: auto;
+  }
+  span[data-slate-node='text'] {
+    font-weight: 500;
   }
   div[data-theme='dark'],
   p[data-theme='dark'] {
@@ -58,7 +78,7 @@
     margin: 0;
     list-style-position: inside;
     li {
-      padding: 5px 0px 5px 40px;
+      padding: 5px 0px 5px 20px;
       width: 100%;
       font-size: 15px;
       cursor: auto;
@@ -77,6 +97,8 @@
     position: relative;
     margin: 0;
     flex: 1;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
     code {
       .element-container {
         height: 30px;

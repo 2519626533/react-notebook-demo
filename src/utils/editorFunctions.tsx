@@ -104,7 +104,6 @@ const toggleCodeBlock = (editor: CustomEditor, isActive: boolean) => {
     })
       .join('\n')
     const detectedLanguage = detectLanguage(codeText)
-    console.log(detectedLanguage)
 
     Transforms.wrapNodes(
       editor,

@@ -1,4 +1,4 @@
-import { getNotes, getSettings } from '@/store/selector'
+import { getNoteState, getSettings } from '@/store/selector'
 import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import DefaultEditor from '../editor/DefaultEditor'
@@ -10,7 +10,7 @@ const Note = () => {
   /*
   * Selectors
  */
-  const { activeNoteId } = useSelector(getNotes)
+  const { activeNoteId } = useSelector(getNoteState)
   const { isPreviewMode, darkTheme } = useSelector(getSettings)
   // 路由判断
   const location = useLocation()

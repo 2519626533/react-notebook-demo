@@ -1,15 +1,16 @@
+import type { SYNC_CONFIG_TYPES } from '@/types/api'
 import type { noteItem, SyncSagaAction } from '@/types/slice'
 import type { SagaIterator } from 'redux-saga'
 import { requestNotes } from '@/apis/local'
 import { createNoteApi, deleteNoteApi, getAllNotesApi, updateNoteApi } from '@/apis/notes'
 import { syncError, syncSuccess } from '@/store/sync'
+import { deepDiff } from '@/utils/deepDiff'
 import dayjs from 'dayjs'
-import { diff } from 'deep-object-diff'
 import { all, call, put } from 'redux-saga/effects'
 
-const SYNC_CONFIG = {
+const SYNC_CONFIG: SYNC_CONFIG_TYPES = {
   maxRetries: 3,
-  conflictStrategy: 'client' as 'client' | 'server',
+  conflictStrategy: 'server',
   // 冲突同步策略，’client‘则以本地数据为准，’server‘则以服务端数据为准
 }
 // 处理服务器与离线数据同步
@@ -23,7 +24,12 @@ export function* handleSync(): SagaIterator {
       ])
     // console.log('同步前的数据:', localNotes, serverNotes)
     // 生成待同步操作队列
-    const syncQueue = yield call(generateSyncActions, localNotes, serverNotes)
+    const syncQueue = yield call(
+      generateSyncActions,
+      localNotes,
+      serverNotes,
+      SYNC_CONFIG.conflictStrategy,
+    )
     // console.log('同步操作队列:', syncQueue)
     // 执行同步
     const result: boolean[] = yield all(syncQueue.map(
@@ -40,33 +46,36 @@ export function* handleSync(): SagaIterator {
   }
 }
 // 生成同步操作队列
-function* generateSyncActions(local: noteItem[], server: noteItem[]) {
+function* generateSyncActions(local: noteItem[], server: noteItem[], strategy: string) {
   const localMap = new Map(local.map(n => [n.id, n]))
   const serverMap = new Map(server.map(n => [n.id, n]))
   const actions = []
 
+  const standardMap = strategy === 'client' ? localMap : serverMap
+  const toBeComparedMap = strategy === 'client' ? serverMap : localMap
+  // console.log(localMap, serverMap, standardMap)
   // 检查新增/修改
-  for (const [id, localNote] of localMap) {
-    const serverNote = serverMap.get(id)
+  for (const [id, Note] of standardMap) {
+    const toBeComparedNote = toBeComparedMap.get(id)
 
-    if (!serverNote) {
-      actions.push({ type: 'CREATE', payload: localNote })
+    if (!toBeComparedNote) {
+      actions.push({ type: 'CREATE', payload: Note })
     } else {
-      const changes = diff(serverNote, localNote)
+      const changes = deepDiff(toBeComparedNote, Note)
       // console.log('diff:', changes)
       if (Object.keys(changes).length > 0) {
         actions.push({
           type: 'UPDATE',
-          payload: mergeNotes(serverNote, localNote, SYNC_CONFIG.conflictStrategy),
+          payload: mergeNotes(toBeComparedNote, Note, SYNC_CONFIG.conflictStrategy),
         })
       }
     }
   }
 
   // 检测删除
-  for (const [id, serverNote] of serverMap) {
-    if (!localMap.has(id)) {
-      actions.push({ type: 'DELETE', payload: serverNote })
+  for (const [id, Note] of toBeComparedMap) {
+    if (!standardMap.has(id)) {
+      actions.push({ type: 'DELETE', payload: Note })
     }
   }
   return actions

@@ -35,8 +35,9 @@ const getChildNodeToDecorations = ([
 
   const language = block.language || 'plaintext'
   const tokens = Prism.tokenize(text, Prism.languages[language])
-
+  // console.log(tokens)
   const normalizedTokens = normalizeTokens(tokens)
+  // console.log(normalizedTokens)
   const blockChildren = block.children as Element[]
 
   for (let index = 0; index < normalizedTokens.length; index++) {

@@ -1,6 +1,6 @@
 import type { NoteProps } from '@/types/layout'
 import { toggleNoteToFavorite, toggleTrashNotes } from '@/store/note'
-import { getNotes, getSettings, getSync } from '@/store/selector'
+import { getNoteState, getSettings, getSync } from '@/store/selector'
 import { togglePreviewMode, toggleThemeMode } from '@/store/setting'
 import { sync } from '@/store/sync'
 import { emptyElement } from '@/types/components'
@@ -13,7 +13,7 @@ import LastSync from '../element/LastSync'
 
 const NoteMenuBar: React.FC<NoteProps> = ({ isScratchpad }) => {
   // Selector
-  const { notes, activeNoteId } = useSelector(getNotes)
+  const { notes, activeNoteId } = useSelector(getNoteState)
   const { syncing, lastSynced, pendingSync, ServiceStatus } = useSelector(getSync)
   const dispatch = useDispatch()
 

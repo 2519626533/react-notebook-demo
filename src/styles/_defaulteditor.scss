@@ -21,6 +21,9 @@
       outline: auto;
       z-index: 2;
       isolation: isolate;
+      white-space: pre-wrap !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
     }
     .editable[data-theme='light'] {
       background-color: $editable-bcc-light;

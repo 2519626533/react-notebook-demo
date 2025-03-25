@@ -14,7 +14,7 @@ import { handleSync } from './sync-saga'
 /*
 * 获取数据/设置流程：
   请求服务器端数据-->请求成功，loadSuccess，保存本地
-              |——>请求失败，降级到从本地存储中获取
+              ——>请求失败，降级到从本地存储中获取
 */
 
 /*
@@ -24,7 +24,7 @@ import { handleSync } from './sync-saga'
 // 初始化获取notes
 function* fetchNotes(): SagaIterator {
   try {
-    const { ServiceStatus } = yield select(getSync)
+    const { ServiceStatus }: { ServiceStatus: 'online' | 'offline' } = yield select(getSync)
     if (ServiceStatus === 'online') {
       yield call(handleSync)
       const serverNotes: noteItem[] = yield call(getAllNotesApi)

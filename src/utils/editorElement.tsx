@@ -19,6 +19,7 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
   const path = ReactEditor.findPath(editor, element)
   let isActive = false
 
+  // 高亮所选行
   if (editor.selection) {
     const blockEntry = Editor.above(editor, {
       at: editor.selection,
@@ -170,12 +171,9 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
 // 定义一个 React 组件来渲染带有粗体文本的叶子
 const Leaf: React.FC<RenderLeafProps & { leaf: CustomText }> = ({ attributes, children, leaf }) => {
   const { text, ...rest } = leaf
+  // console.log(leaf)
   if (leaf.bold) {
     children = <strong>{children}</strong>
-  }
-
-  if (leaf.code) {
-    children = <code>{children}</code>
   }
 
   if (leaf.italic) {
@@ -191,10 +189,13 @@ const Leaf: React.FC<RenderLeafProps & { leaf: CustomText }> = ({ attributes, ch
       className={Object.keys(rest).join(' ')}
       // 在渲染逻辑中处理样式叠加
       style={{
-        ...(leaf.url && { color: '#52BE80' }),
+        ...(leaf.url && {
+          color: '#117A65',
+          wordBreak: 'break-word',
+        }),
         ...(leaf.mdLink && {
           textDecoration: 'underline',
-          color: '#D2B4DE',
+          color: '#76448A',
         }),
         ...(leaf.uuid && {
           fontStyle: 'italic',

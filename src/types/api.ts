@@ -20,3 +20,9 @@ export interface APISettings {
   darkTheme: boolean
   isPreviewMode: boolean
 }
+
+// SYNC_CONFIG interface
+export interface SYNC_CONFIG_TYPES {
+  maxRetries: number
+  conflictStrategy: 'client' | 'server'
+}

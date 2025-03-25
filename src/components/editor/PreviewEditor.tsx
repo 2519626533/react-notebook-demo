@@ -1,13 +1,13 @@
 import type { NoteProps } from '@/types/layout'
 import type { noteItem } from '@/types/slice'
 import { setActiveNote, swapFolder } from '@/store/note'
-import { getNotes, getSettings } from '@/store/selector'
+import { getNoteState, getSettings } from '@/store/selector'
 import { emptyElement } from '@/types/components'
 import { Folder } from '@/utils/enums'
 import { getActiveNote, getScratchpad } from '@/utils/notes-helps'
 import { uuidPlugin } from '@/utils/reactMarkdownPlugins'
 import { slateToMd } from '@/utils/slateToMd'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import Markdown from 'react-markdown'
 import { useDispatch, useSelector } from 'react-redux'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -19,7 +19,7 @@ import NoteLink from '../element/NoteLink'
 
 const PreviewEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const dispatch = useDispatch()
-  const { notes, activeNoteId } = useSelector(getNotes)
+  const { notes, activeNoteId } = useSelector(getNoteState)
   const activeNote = useMemo(() => {
     if (isScratchpad) {
       return getScratchpad(notes)
@@ -38,18 +38,20 @@ const PreviewEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
 
   const { darkTheme } = useSelector(getSettings)
 
-  const handleNoteLinkClick = (e: React.SyntheticEvent, note: noteItem) => {
+  const handleNoteLinkClick = useCallback((e: React.SyntheticEvent, note: noteItem) => {
     e.preventDefault()
 
     if (note) {
-      dispatch(setActiveNote(note.id))
       if (note.scratchpad) {
         dispatch(swapFolder({ folder: Folder.SCRATCHPAD }))
       } else if (note.favorite) {
-        dispatch(swapFolder({ folder: Folder.FAVORITES }))
+        dispatch(swapFolder({
+          folder: Folder.FAVORITES,
+          activeNoteId: note.id,
+        }))
       }
     }
-  }
+  }, [dispatch])
 
   /*
  * Markdown 渲染函数
@@ -74,6 +76,7 @@ const PreviewEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
             return <a href={href} {...props}>{children}</a>
           },
           code({ children, className, ...props }) {
+            // console.log(props)
             const match = /language-(\w+)/.exec(className || '')
             return match
               ? (

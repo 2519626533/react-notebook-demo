@@ -1,4 +1,4 @@
-import type { CodeLineElement, CustomElement, CustomText, MyNodeTypes } from '@/types/slate'
+import type { CustomElement, MyNodeTypes } from '@/types/slate'
 import { BlockType, myRemarkSlateNodeTypes } from '@/types/components'
 import { type OptionType, serialize } from 'remark-slate'
 import { type Descendant, Element, Node } from 'slate'

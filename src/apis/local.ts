@@ -51,21 +51,24 @@ const getLocalStorage: GetLocalStorage = (key, errorMessage = 'Something went wr
 }
 
 const getUserNotes = () => (resolve: PromiseCallback, reject: PromiseCallback) => {
-  const notes = localStorage.getItem('notes')
+  try {
+    const notesStr: string | null = localStorage.getItem('notes')
+    let notesData: noteItem[] = []
 
-  if (!notes) {
-    resolve([scratchpadNote, welcomeNote])
-  } else if (Array.isArray(JSON.parse(notes))) {
-    resolve(
-      (JSON.parse(notes).length === 0
-        || !JSON.parse(notes).find((note: noteItem) => note.scratchpad))
-        ? [scratchpadNote, ...JSON.parse(notes)]
-        : JSON.parse(notes),
-    )
-  } else {
-    reject({
-      message: 'Something went wrong',
-    })
+    if (!notesStr) {
+      notesData = [scratchpadNote, welcomeNote]
+    } else {
+      const parsedData = JSON.parse(notesStr)
+      if (Array.isArray(parsedData)) {
+        const hasScratchpad = parsedData.some((note: noteItem) => note.scratchpad)
+        notesData = hasScratchpad ? parsedData : [scratchpadNote, ...parsedData]
+      } else {
+        notesData = [scratchpadNote, welcomeNote]
+      }
+    }
+    resolve(notesData)
+  } catch {
+    reject({ message: 'Failed to parse notes data' })
   }
 }
 
@@ -80,5 +83,7 @@ export const saveState = ({ notes }: SyncPayload) =>
 export const saveSettings = (settings: SettingState) =>
   Promise.resolve(localStorage.setItem('settings', JSON.stringify(settings)))
 
-export const requestNotes = () => new Promise(getUserNotes())
+export const requestNotes = () =>
+  new Promise(getUserNotes())
+
 export const requestSettings = () => new Promise(getLocalStorage('settings'))

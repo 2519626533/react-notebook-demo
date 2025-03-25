@@ -2,12 +2,13 @@ import type { NoteProps } from '@/types/layout'
 import type { CustomEditor, CustomElement } from '@/types/slate'
 import type { Descendant, Operation, Path } from 'slate'
 import { updateNote } from '@/store/note'
-import { getNotes, getSettings } from '@/store/selector'
+import { getNoteState, getSettings } from '@/store/selector'
 import { BlockType, emptyElement } from '@/types/components'
 import { emptyNote, type noteItem } from '@/types/slice'
 import { SetNodeToDecorations } from '@/utils/decorationsFn'
 import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorHooks'
 import { getActiveNote, getScratchpad } from '@/utils/notes-helps'
+import CheckableTag from 'antd/es/tag/CheckableTag'
 import dayjs from 'dayjs'
 import _ from 'lodash'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
@@ -29,7 +30,8 @@ import 'prismjs/components/prism-java'
 // EditArea主体
 const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const editRef = useRef<HTMLDivElement>(null)
-  const { notes, activeNoteId } = useSelector(getNotes, shallowEqual)
+  const slateRef = useRef<HTMLDivElement>(null)
+  const { notes, activeNoteId } = useSelector(getNoteState, shallowEqual)
   const dispatch = useDispatch()
 
   // 创建Slate
@@ -55,6 +57,39 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const value = useMemo(() => {
     return activeNote ? activeNote.content : [emptyElement]
   }, [activeNote])
+  console.log(value)
+  const lineHeight = 30 // 预设高度
+  let totalVal = 0
+  value.forEach((item: Descendant) => {
+    if (Element.isElement(item)) {
+      item.children.forEach(() => {
+        totalVal++
+      })
+    }
+  })
+  const totalHeight = lineHeight * totalVal
+  console.log(totalHeight, totalVal, slateRef.current?.scrollHeight)
+  // document.addEventListener('scroll', (event) => {
+  //   console.log(slateRef.current?.scrollHeight)
+  //   console.log(event)
+  // })
+
+  // 切换笔记
+  useEffect(() => {
+    if (activeNote) {
+      Transforms.delete(editor, {
+        at: {
+          anchor: Editor.start(editor, []),
+          focus: Editor.end(editor, []),
+        },
+      })
+      Transforms.insertFragment(editor, value)
+      // 强制重置选区
+      Transforms.deselect(editor)
+      // 清空操作历史
+      editor.history = { undos: [], redos: [] }
+    }
+  }, [activeNoteId])
 
   // 渲染块级格式
   const renderElement = useRenderElement()
@@ -76,7 +111,7 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     let lineNumber = 1
     const updateNodes: [Path, number][] = []
 
-    const blockTypes = new Set(['code-block', 'bulleted-list', 'numbered-list', ...BlockType])
+    const blockTypes = new Set([...BlockType])
 
     for (const [node, path] of Editor.nodes<CustomElement>(editor, {
       at: [],
@@ -121,23 +156,6 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
       document.head.removeChild(link)
     }
   }, [darkTheme])
-
-  //
-  useEffect(() => {
-    if (activeNote) {
-      Transforms.delete(editor, {
-        at: {
-          anchor: Editor.start(editor, []),
-          focus: Editor.end(editor, []),
-        },
-      })
-      Transforms.insertFragment(editor, value)
-      // 强制重置选区
-      Transforms.deselect(editor)
-      // 清空操作历史
-      editor.history = { undos: [], redos: [] }
-    }
-  }, [activeNoteId])
 
   // // 计时器延迟渲染toolBar
   // useEffect(() => {
@@ -203,7 +221,11 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
 
   return (
     <div className="notebook">
-      <div className="slate" data-theme={darkTheme ? 'dark' : 'light'}>
+      <div
+        className="slate"
+        data-theme={darkTheme ? 'dark' : 'light'}
+        ref={slateRef}
+      >
         <Slate
           // key={activeNoteId}
           editor={editor}

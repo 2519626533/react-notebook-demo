@@ -32,6 +32,7 @@ const useDecorate = (editor: CustomEditor) => {
   return useCallback((nodeEntry: NodeEntry) => {
     const [node, path] = nodeEntry
     const ranges: Range[] = []
+    // 高亮代码块
     if (Element.isElement(node) && node.type === 'code-block') {
       for (const child of node.children) {
         if (Element.isElement(child) && child.type === 'code-line') {
@@ -40,6 +41,7 @@ const useDecorate = (editor: CustomEditor) => {
         }
       }
     }
+
     // 高亮网址、uuid、mdLink
     if (Element.isElement(node) && TextDecorationList.includes(node.type as string)) {
       node.children.forEach((child, childIndex) => {

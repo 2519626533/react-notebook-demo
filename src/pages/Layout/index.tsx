@@ -3,11 +3,11 @@ import type { noteItem } from '@/types/slice'
 import type { MenuInfo } from 'rc-menu/es/interface'
 import request from '@/apis/request'
 import { addNote, loadNote, swapFolder } from '@/store/note'
-import { getNotes } from '@/store/selector'
+import { getNoteState } from '@/store/selector'
 import { loadSetting } from '@/store/setting'
 import { sync, updateServiceStatus } from '@/store/sync'
 import { useInterval } from '@/utils/editorHooks'
-import { KeyToFolderMap } from '@/utils/enums'
+import { FolderToKeyMap, KeyToFolderMap } from '@/utils/enums'
 import { DeleteOutlined, FormOutlined, PlusCircleTwoTone, ReconciliationOutlined, StarOutlined } from '@ant-design/icons'
 import { Layout, Menu } from 'antd'
 import dayjs from 'dayjs'
@@ -38,7 +38,7 @@ const items: MenuItems[] = [{
 
 const LayoutPage = () => {
   // Redux state
-  const { notes, activeFolder } = useSelector(getNotes)
+  const { notes, activeFolder } = useSelector(getNoteState)
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const location = useLocation()
@@ -70,13 +70,19 @@ const LayoutPage = () => {
   const selectedKey = location.pathname
   // activeFolder更新时同步路由
   useEffect(() => {
+    const newPath = FolderToKeyMap[activeFolder]
+
+    navigate(newPath)
+  }, [activeFolder, navigate])
+  // 路径变化时更新activeFolder
+  useEffect(() => {
     const path = location.pathname
     const newFolder = KeyToFolderMap[path]
 
     if (newFolder && newFolder !== activeFolder) {
       dispatch(swapFolder({ folder: newFolder }))
     }
-  }, [location.pathname, activeFolder, navigate, dispatch])
+  }, [location.pathname, navigate, dispatch])
 
   const onSelect = (e: MenuInfo): void => {
     const { key } = e

@@ -19,3 +19,11 @@ export const FolderToKeyMap: Record<Folder, string> = {
   [Folder.FAVORITES]: '/favorites',
   [Folder.TRASH]: '/trash',
 }
+
+export const SlateElementHeight: Record<string, number> = {
+  'heading-one': 65,
+  'heading-two': 52,
+  'block-quote': 44,
+  'paragraph': 30,
+}
+// averageHeight: 35

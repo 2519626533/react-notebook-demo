@@ -88,12 +88,14 @@ const noteStore = createSlice({
       state.searchValue = payload
     },
     // 切换文件夹
-    swapFolder(state, { payload }: PayloadAction<{ folder: Folder }>) {
+    swapFolder(state, { payload }: PayloadAction<{ folder: Folder, activeNoteId?: string }>) {
       state.activeFolder = payload.folder
-      state.activeNoteId = getFirstNoteId(
-        payload.folder,
-        state.notes,
-      )
+      state.activeNoteId = payload.activeNoteId
+        ? payload.activeNoteId
+        : getFirstNoteId(
+            payload.folder,
+            state.notes,
+          )
     },
     // 从 localStorage中获取notes
     loadNote(state) {
@@ -101,6 +103,7 @@ const noteStore = createSlice({
     },
     loadNotesSuccess(state, { payload }: PayloadAction<{ notes: noteItem[] }>) {
       state.notes = payload.notes
+      state.loading = false
       state.activeNoteId = getFirstNoteId(
         state.activeFolder,
         payload.notes,

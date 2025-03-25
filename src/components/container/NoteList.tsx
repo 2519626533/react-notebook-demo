@@ -1,6 +1,6 @@
 import type { noteItem } from '@/types/slice'
 import { pruneEmptyNotes, setActiveNote, updateNoteTitle, updateSearchValue } from '@/store/note'
-import { getNotes, getSettings } from '@/store/selector'
+import { getNoteState, getSettings } from '@/store/selector'
 import { Folder } from '@/utils/enums'
 import { EllipsisOutlined, ReadOutlined, StarOutlined } from '@ant-design/icons'
 import classnames from 'classnames'
@@ -12,7 +12,7 @@ import SearchBar from '../element/SearchBar'
 
 const NoteList = () => {
   const { darkTheme } = useSelector(getSettings)
-  const { notes, activeNoteId, searchValue, activeFolder } = useSelector(getNotes)
+  const { notes, activeNoteId, searchValue, activeFolder } = useSelector(getNoteState)
   const dispatch = useDispatch()
 
   // 搜索词正则表达式及匹配

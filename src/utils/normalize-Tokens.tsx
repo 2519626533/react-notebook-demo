@@ -7,17 +7,27 @@ type Token = {
 
 const newlineRe = /\r\n|\r|\n/
 
-const normalizedEmptyLines = (line: Token[]) => {
-  if (line.length === 0) {
-    line.push({
+const normalizedEmptyLines = (line: Token[]): Token[] => {
+  // 创建副本避免原数组污染
+  const processedLine = [...line]
+  // 空行处理：统一生成占位符
+  if (processedLine.length === 0) {
+    return [{
       types: ['plain'],
       content: '\n',
       empty: true,
-    })
-  } else if (line.length === 1 && line[0].content === '') {
-    line[0].content = '\n'
-    line[0].empty = true
+    }]
   }
+  // 单个空 Token 处理
+  const [firstToken] = processedLine
+  if (processedLine.length === 1 && firstToken?.content === '') {
+    return [{
+      ...firstToken,
+      content: '\n',
+      empty: true,
+    }]
+  }
+  return processedLine
 }
 
 const appendTypes = (types: string[], add: string[] | string): string[] => {
