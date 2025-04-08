@@ -3,15 +3,15 @@ import type { CustomEditor, CustomElement } from '@/types/slate'
 import type { Descendant, Operation, Path } from 'slate'
 import { updateNote } from '@/store/note'
 import { getNoteState, getSettings } from '@/store/selector'
-import { BlockType, emptyElement } from '@/types/components'
+import { BlockType, emptyElement, type IVisibleState, type VSPosition } from '@/types/components'
 import { emptyNote, type noteItem } from '@/types/slice'
 import { SetNodeToDecorations } from '@/utils/decorationsFn'
-import { useDecorate, useOnKeyDown, useRenderElement, useRenderLeaf } from '@/utils/editorHooks'
+import { binarySearch, flatArr, positionInit } from '@/utils/editor-helps'
+import { useDecorate, useEventListener, useOnKeyDown, useReactive, useRenderElement, useRenderLeaf } from '@/utils/Hooks'
 import { getActiveNote, getScratchpad } from '@/utils/notes-helps'
-import CheckableTag from 'antd/es/tag/CheckableTag'
 import dayjs from 'dayjs'
 import _ from 'lodash'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { createEditor, Editor, Element, Node, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
@@ -30,7 +30,6 @@ import 'prismjs/components/prism-java'
 // EditArea主体
 const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const editRef = useRef<HTMLDivElement>(null)
-  const slateRef = useRef<HTMLDivElement>(null)
   const { notes, activeNoteId } = useSelector(getNoteState, shallowEqual)
   const dispatch = useDispatch()
 
@@ -57,22 +56,81 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   const value = useMemo(() => {
     return activeNote ? activeNote.content : [emptyElement]
   }, [activeNote])
-  console.log(value)
-  const lineHeight = 30 // 预设高度
-  let totalVal = 0
-  value.forEach((item: Descendant) => {
-    if (Element.isElement(item)) {
-      item.children.forEach(() => {
-        totalVal++
-      })
-    }
+
+  // 虚拟滚动
+  const containerRef = useRef<HTMLDivElement>(null) // 容器ref
+  const slateRef = useRef<HTMLDivElement>(null)
+  const visibleState: IVisibleState = useReactive({
+    scrollAllHeight: '100%', // 容器初始高度
+    listHeight: 0, // 行总高度
+    initItemHeight: 30, // 初始行高
+    renderCount: 0, // 渲染个数
+    bufferCount: 40, // 缓冲区个数
+    start: 0, // 开始索引
+    end: 0, // 终止索引
+    currentOffset: 0, // 偏移量
   })
-  const totalHeight = lineHeight * totalVal
-  console.log(totalHeight, totalVal, slateRef.current?.scrollHeight)
-  // document.addEventListener('scroll', (event) => {
-  //   console.log(slateRef.current?.scrollHeight)
-  //   console.log(event)
-  // })
+
+  let flattedArr = flatArr(value)
+  const [positions, setPosition] = useState<VSPosition[]>(() =>
+    positionInit(flattedArr, visibleState.initItemHeight))
+
+  useEffect(() => {
+
+  }, [value, visibleState.initItemHeight])
+
+  // visibleState初始化
+  useEffect(() => {
+    if (!containerRef.current)
+      return
+    const scrollAllHeight = containerRef.current.offsetHeight
+
+    const listHeight = positions[positions.length - 1].bottom
+
+    const renderCount = Math.ceil(
+      scrollAllHeight / visibleState.initItemHeight,
+    ) + visibleState.bufferCount
+
+    visibleState.renderCount = renderCount
+    visibleState.end = renderCount + 1
+    visibleState.listHeight = listHeight
+  }, [containerRef, positions])
+
+  useEventListener('scroll', _.throttle(() => {
+    if (!slateRef.current) {
+      return
+    }
+    const { scrollTop } = slateRef.current
+    // console.log(positions)
+    visibleState.listHeight = positions[positions.length - 1].bottom
+    visibleState.start = binarySearch(positions, scrollTop) - visibleState.bufferCount
+    visibleState.end = visibleState.start + visibleState.renderCount + 1 + visibleState.bufferCount
+    visibleState.currentOffset = visibleState.start > 0
+      ? positions[visibleState.start - 1].bottom
+      : 0
+    // console.log(visibleState)
+  }, 16), slateRef)
+
+  // 更新position
+  const updatePosition = useCallback((index: number, height: number): void => {
+    setPosition((prev) => {
+      if (index < 0 || Math.abs(prev[index]?.height - height) <= 1) {
+        return prev
+      }
+
+      const newPositions = [...prev]
+      newPositions[index].height = height
+      newPositions[index].top = newPositions[index - 1].bottom
+      newPositions[index].bottom = newPositions[index].top + height
+
+      for (let i = index + 1; i < newPositions.length; i++) {
+        newPositions[i].top = newPositions[i - 1].bottom
+        newPositions[i].bottom = newPositions[i].top + newPositions[i].height
+      }
+
+      return newPositions
+    })
+  }, [])
 
   // 切换笔记
   useEffect(() => {
@@ -90,9 +148,12 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
       editor.history = { undos: [], redos: [] }
     }
   }, [activeNoteId])
-
   // 渲染块级格式
-  const renderElement = useRenderElement()
+  const renderElement = useRenderElement(
+    flattedArr,
+    [visibleState.start, visibleState.end],
+    updatePosition,
+  )
 
   // 渲染字符集格式
   const renderLeaf = useRenderLeaf()
@@ -157,15 +218,6 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     }
   }, [darkTheme])
 
-  // // 计时器延迟渲染toolBar
-  // useEffect(() => {
-  //   dispatch(updateIsEditorReady(false))
-  //   const timerOut = setTimeout(() => {
-  //     dispatch(updateIsEditorReady(true))
-  //   }, 0)
-  //   return () => clearTimeout(timerOut)
-  // }, [activeNoteId, editor, dispatch])
-
   // 更新note内容防抖机制
   const debounceUpdate = useRef(
     _.debounce((noteData: noteItem) => {
@@ -183,7 +235,9 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     )
     if (isAstChange) {
       getLineNumbers()
-
+      flattedArr = flatArr(value)
+      const initPos = positionInit(flattedArr, visibleState.initItemHeight)
+      setPosition(initPos)
       const noteData: noteItem = activeNote
         ? {
             id: activeNote?.id,
@@ -220,35 +274,59 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   }
 
   return (
-    <div className="notebook">
+    <div className="notebook" ref={containerRef}>
       <div
         className="slate"
         data-theme={darkTheme ? 'dark' : 'light'}
         ref={slateRef}
+        style={{
+          height: visibleState.scrollAllHeight,
+          overflow: 'auto',
+          position: 'relative',
+        }}
       >
-        <Slate
-          // key={activeNoteId}
-          editor={editor}
-          initialValue={value}
-          onChange={(value) => {
-            editUpdate(value, editor)
+        <div
+          className="slate-virtual-placeholder"
+          style={{
+            minHeight: visibleState.listHeight,
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            right: 0,
           }}
         >
-          <ToolBar />
-          <SetNodeToDecorations />
-          <Editable
-            ref={editRef}
-            className="editable"
-            data-theme={darkTheme ? 'dark' : 'light'}
-            style={{ outline: 'none' }}
-            decorate={decorate}
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-            onKeyDown={onKeyDown}
-            onCopy={handleCopy}
-            spellCheck={false}
-          />
-        </Slate>
+          <Slate
+          // key={activeNoteId}
+            editor={editor}
+            initialValue={value}
+            onChange={(value) => {
+              editUpdate(value, editor)
+            }}
+          >
+            <ToolBar />
+            <SetNodeToDecorations />
+            <Editable
+              ref={editRef}
+              className="editable"
+              data-theme={darkTheme ? 'dark' : 'light'}
+              style={{
+                outline: 'none',
+                transform: `translateY(${visibleState.currentOffset}px)`,
+                // willChange: 'transform',
+                position: 'relative',
+                left: 0,
+                top: 0,
+                right: 0,
+              }}
+              decorate={decorate}
+              renderElement={renderElement}
+              renderLeaf={renderLeaf}
+              onKeyDown={onKeyDown}
+              onCopy={handleCopy}
+              spellCheck={false}
+            />
+          </Slate>
+        </div>
       </div>
     </div>
   )

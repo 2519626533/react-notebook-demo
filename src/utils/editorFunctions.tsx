@@ -59,11 +59,16 @@ const toggleBlock = (editor: CustomEditor, format: CustomFormat) => {
   Transforms.unwrapNodes(editor, {
     match: node =>
       !Editor.isEditor(node)
-      && SlateElement.isElement(node)
+      && Element.isElement(node)
       && LIST_TYPES.includes(node.type as ListType)
       && !TEXT_ALGIN_TYPES.includes(format as TextAlginType),
     split: true,
   })
+
+  const matches = Array.from(Editor.nodes(editor, {
+    match: n => Element.isElement(n) && (n.type === 'paragraph' || 'list-item'),
+  }))
+
   let newProperties: Partial<SlateElement>
   if (TEXT_ALGIN_TYPES.includes(format as TextAlginType)) {
     newProperties = {
@@ -77,7 +82,15 @@ const toggleBlock = (editor: CustomEditor, format: CustomFormat) => {
   Transforms.setNodes<SlateElement>(editor, newProperties)
 
   if (!isActive && isList) {
-    const block = { type: format, children: [] }
+    const matchLen = matches.length
+    const startIndex = matches[0][0].lineNumber
+    const endIndex = matches[matchLen - 1][0].lineNumber
+    const block = {
+      type: format,
+      children: [],
+      startIndex,
+      endIndex,
+    }
     Transforms.wrapNodes(editor, block)
   }
 }
@@ -99,6 +112,10 @@ const toggleCodeBlock = (editor: CustomEditor, isActive: boolean) => {
       match: n => Element.isElement(n) && n.type === 'paragraph',
     }))
 
+    const matchLen = matches.length
+    const startIndex = matches[0][0].lineNumber
+    const endIndex = matches[matchLen - 1][0].lineNumber
+
     const codeText = matches.map((match) => {
       return match[0].children[0].text
     })
@@ -111,6 +128,8 @@ const toggleCodeBlock = (editor: CustomEditor, isActive: boolean) => {
         type: 'code-block',
         language: detectedLanguage.language,
         children: [{ text: '' }],
+        startIndex,
+        endIndex,
       },
       {
         match: n => Element.isElement(n) && n.type === 'paragraph',

@@ -106,3 +106,24 @@ export interface NoteListButtonProps {
 export interface EmptyEditorProps {
   darkTheme: boolean
 }
+/******************************************************************************
+ *  Editor
+ ******************************************************************************/
+export type VSPosition = {
+  index: number
+  height: number
+  top: number
+  bottom: number
+  dHeight?: number
+}
+
+export interface IVisibleState {
+  scrollAllHeight: string
+  listHeight: number
+  initItemHeight: number
+  renderCount: number
+  bufferCount: number
+  start: number
+  end: number
+  currentOffset: number
+}

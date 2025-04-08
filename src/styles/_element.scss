@@ -4,17 +4,15 @@
   align-items: center;
   cursor: default;
   .line-wrapper {
-    left: -44px;
     user-select: none;
     pointer-events: none;
     caret-color: transparent;
     cursor: pointer;
     .line-number {
       min-width: 20px;
-      width: 44px;
       line-height: 22.5px;
       padding: 0 10px 0 5px;
-      text-align: right;
+      text-align: center;
       font-size: 15px;
       user-select: none;
       pointer-events: none;

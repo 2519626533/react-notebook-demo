@@ -21,9 +21,10 @@ export const FolderToKeyMap: Record<Folder, string> = {
 }
 
 export const SlateElementHeight: Record<string, number> = {
-  'heading-one': 65,
+  'heading-one': 65.6,
   'heading-two': 52,
   'block-quote': 44,
-  'paragraph': 30,
+  'paragraph': 29.2,
+  'list-item': 30,
 }
 // averageHeight: 35

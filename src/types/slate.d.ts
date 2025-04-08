@@ -4,29 +4,80 @@ import type { BaseEditor, Descendant } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
-// 编辑样式类型
+// 多行块级元素
+export type MultiBlockElement =
+  | CodeBlockElement
+  | BulletedListElement
+  | NumberedListElement
+
 export type CodeBlockElement = {
   type: 'code-block'
   language: string
+  children: CodeLineElement[]
+  startIndex?: number
+  endIndex?: number
+}
+
+export type BulletedListElement = {
+  type: 'bulleted-list'
+  children: ListItemElement[]
+  startIndex?: number
+  endIndex?: number
+}
+
+export type NumberedListElement = {
+  type: 'numbered-list'
+  children: ListItemElement[]
+  startIndex?: number
+  endIndex?: number
+}
+
+// 单行块级元素
+export type SingleBlockElement =
+  | ListItemElement
+  | CodeLineElement
+  | HeadingOneElement
+  | HeadingTwoElement
+
+export type ListItemElement = {
+  type: 'list-item'
   children: Descendant[]
-  lineNumber?: number
+  lineNumber: number
 }
 
 export type CodeLineElement = {
   type: 'code-line'
   children: Descendant[]
-  lineNumber?: number
+  lineNumber: number
+}
+
+export type HeadingOneElement = {
+  type: 'heading-one'
+  children: Descendant[]
+  lineNumber: number
+}
+
+export type HeadingTwoElement = {
+  type: 'heading-two'
+  children: Descendant[]
+  lineNumber: number
+}
+
+export type BlockQuoteElement = {
+  type: 'block-quote'
+  children: Descendant[]
+  lineNumber: number
 }
 
 type CustomElement =
-  | CodeBlockElement
-  | CodeLineElement
-  | { type: null, children: Descendant[], lineNumber?: number }
+  | MultiBlockElement
+  | SingleBlockElement
+  | { type: null, children: Descendant[], lineNumber: number }
   | {
     type: string
     align?: string
     children: Descendant[]
-    lineNumber?: number
+    lineNumber: number
   }
 
 export interface MyNodeTypes extends NodeTypes {
@@ -90,7 +141,6 @@ export type CustomEditor =
     nodeToDecorations?: Map<CustomElement, Range[]>
   }
 
-// Slate Button type
 type BaseProps = {
   className: string
   [key: string]: unknown
@@ -98,7 +148,7 @@ type BaseProps = {
 
 declare module 'slate' {
   interface CustomTypes {
-    Editor: CustomEditor & ReactEditor & HistoryEditor
+    Editor: CustomEditor
     Element: CustomElement
     Text: CustomText | EmptyText
     Range: BaseRange & {

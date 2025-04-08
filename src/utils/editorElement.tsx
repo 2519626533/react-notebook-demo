@@ -2,13 +2,17 @@ import type { CodeBlockElement, CustomElement, CustomText } from '@/types/slate'
 import LanguageSelector from '@/components/element/LanguageSelector'
 import { getSettings } from '@/store/selector'
 import _ from 'lodash'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { forwardRef } from 'react'
 import { useSelector } from 'react-redux'
 import { Editor, Path, Transforms } from 'slate'
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, useSlate } from 'slate-react'
 
 // Element
-const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element }) => {
+const MyElement = forwardRef<HTMLDivElement, RenderElementProps>(({
+  attributes,
+  children,
+  element,
+}, ref) => {
   const { align = 'left' } = element as { align?: 'left' | 'right' | 'center' | 'justify' }
   const editor = useSlate()
   const { darkTheme } = useSelector(getSettings)
@@ -35,13 +39,14 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
 
   return (
     <div
+      ref={ref}
       className="element-container"
       data-line-index={element.lineNumber}
     >
       {/* 行号容器 */}
       {!isEmpty && (
-        <div className="line-wrapper" contentEditable={false}>
-          <div className="line-number">
+        <div className="line-wrapper" style={{ left: '-44px' }} contentEditable={false}>
+          <div className="line-number" style={{ width: '50px' }}>
             {lineNumber}
           </div>
         </div>
@@ -167,7 +172,7 @@ const MyElement: React.FC<RenderElementProps> = ({ attributes, children, element
       })()}
     </div>
   )
-}
+})
 // 定义一个 React 组件来渲染带有粗体文本的叶子
 const Leaf: React.FC<RenderLeafProps & { leaf: CustomText }> = ({ attributes, children, leaf }) => {
   const { text, ...rest } = leaf
