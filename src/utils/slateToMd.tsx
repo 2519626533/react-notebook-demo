@@ -1,10 +1,11 @@
-import type { CustomElement, MyNodeTypes } from '@/types/slate'
+import type { Options } from '@/types/ast-types'
+import type { CustomElement } from '@/types/slate'
 import { BlockType, myRemarkSlateNodeTypes } from '@/types/components'
-import { type OptionType, serialize } from 'remark-slate'
 import { type Descendant, Element, Node } from 'slate'
 import { convertSlateToRemarkType } from './convertType'
+import { serialize } from './serialize'
 
-const remarkSlateOpts: OptionType<MyNodeTypes> & { nodeTypes: MyNodeTypes } = {
+const remarkSlateOpts: Options = {
   nodeTypes: myRemarkSlateNodeTypes,
 }
 
