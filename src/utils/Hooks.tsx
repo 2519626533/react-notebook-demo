@@ -4,7 +4,7 @@ import { BLOCK_HOTKEYS, CODEBLOCK_HOTKEY, MARK_HOTKEYS, TextDecorationList } fro
 import { Leaf, MyElement } from '@/utils/editorElement'
 import isHotkey from 'is-hotkey'
 import { type DependencyList, useCallback, useEffect, useRef, useState } from 'react'
-import { type Descendant, Editor, Element, type NodeEntry, type Range } from 'slate'
+import { Editor, Element, type NodeEntry, type Range } from 'slate'
 import { depsAreSame, observer } from './editor-helps'
 import { isBlockActive, TEXT_ALGIN_TYPES, toggleBlock, toggleCodeBlock, toggleMark } from './editorFunctions'
 // ------------------------------------------------------------------------------------------------------------------------------------
@@ -13,7 +13,6 @@ import { isBlockActive, TEXT_ALGIN_TYPES, toggleBlock, toggleCodeBlock, toggleMa
 */
 // 块级元素渲染
 const useRenderElement = (
-  flattedArr: Descendant[],
   visibleRange: number[],
   updatePosition: (index: number, height: number) => void,
 ) => {
@@ -24,12 +23,12 @@ const useRenderElement = (
     if (cachedIndex !== undefined) {
       return cachedIndex
     }
-    const index = flattedArr[element.lineNumber - 1]
+    const index = element.lineNumber
       ? element.lineNumber - 1
       : -1
     pathCache.current.set(element, index)
     return index
-  }, [flattedArr])
+  }, [])
 
   return useCallback((props: RenderElementProps) => {
     const element = props.element
@@ -45,6 +44,8 @@ const useRenderElement = (
 
     if (
       index === -1
+      && element.startIndex !== undefined
+      && element.endIndex !== undefined
       && element.startIndex <= end
       && element.endIndex >= start
     ) {
@@ -82,6 +83,9 @@ const useDecorate = (editor: CustomEditor) => {
     // 高亮网址、uuid、mdLink
     if (Element.isElement(node) && TextDecorationList.includes(node.type as string)) {
       node.children.forEach((child, childIndex) => {
+        if (!('text' in child)) {
+          return
+        }
         const childPath = node.type === 'list-item' ? [...path, childIndex] : path
         const text = child.text
 

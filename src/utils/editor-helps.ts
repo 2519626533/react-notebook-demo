@@ -1,12 +1,13 @@
 import type { VSPosition } from '@/types/components'
 import type { CustomElement } from '@/types/slate'
-import { type DependencyList, useCallback } from 'react'
+import type { DependencyList } from 'react'
 import { type Descendant, Element } from 'slate'
 import { SlateElementHeight } from './enums'
 
 type ExtendedDescendant = Descendant & {
   startIndex?: number
   endIndex?: number
+  lineNumber?: number
 }
 
 // 扁平化数组
@@ -48,7 +49,6 @@ export const positionInit = (
     }]
   }
   const positions: VSPosition[] = []
-  console.log(flattedArr)
   flattedArr.forEach((item: ExtendedDescendant) => {
     let index = item.lineNumber
     if (index) {

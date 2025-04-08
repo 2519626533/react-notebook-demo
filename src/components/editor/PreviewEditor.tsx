@@ -1,6 +1,6 @@
 import type { NoteProps } from '@/types/layout'
 import type { noteItem } from '@/types/slice'
-import { setActiveNote, swapFolder } from '@/store/note'
+import { swapFolder } from '@/store/note'
 import { getNoteState, getSettings } from '@/store/selector'
 import { emptyElement } from '@/types/components'
 import { Folder } from '@/utils/enums'

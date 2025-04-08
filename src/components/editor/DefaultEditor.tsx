@@ -11,7 +11,7 @@ import { useDecorate, useEventListener, useOnKeyDown, useReactive, useRenderElem
 import { getActiveNote, getScratchpad } from '@/utils/notes-helps'
 import dayjs from 'dayjs'
 import _ from 'lodash'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { createEditor, Editor, Element, Node, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
@@ -150,7 +150,6 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
   }, [activeNoteId])
   // 渲染块级格式
   const renderElement = useRenderElement(
-    flattedArr,
     [visibleState.start, visibleState.end],
     updatePosition,
   )

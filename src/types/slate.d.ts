@@ -16,6 +16,7 @@ export type CodeBlockElement = {
   children: CodeLineElement[]
   startIndex?: number
   endIndex?: number
+  lineNumber?: number
 }
 
 export type BulletedListElement = {
@@ -23,6 +24,7 @@ export type BulletedListElement = {
   children: ListItemElement[]
   startIndex?: number
   endIndex?: number
+  lineNumber?: number
 }
 
 export type NumberedListElement = {
@@ -30,79 +32,56 @@ export type NumberedListElement = {
   children: ListItemElement[]
   startIndex?: number
   endIndex?: number
+  lineNumber?: number
 }
 
 // 单行块级元素
-export type SingleBlockElement =
-  | ListItemElement
-  | CodeLineElement
-  | HeadingOneElement
-  | HeadingTwoElement
+// export type SingleBlockElement =
+//   | ListItemElement
+//   | CodeLineElement
+//   | HeadingOneElement
+//   | HeadingTwoElement
 
-export type ListItemElement = {
-  type: 'list-item'
-  children: Descendant[]
-  lineNumber: number
-}
+// export type ListItemElement = {
+//   type: 'list-item'
+//   children: Descendant[]
+//   lineNumber: number
+// }
 
-export type CodeLineElement = {
-  type: 'code-line'
-  children: Descendant[]
-  lineNumber: number
-}
+// export type CodeLineElement = {
+//   type: 'code-line'
+//   children: Descendant[]
+//   lineNumber: number
+// }
 
-export type HeadingOneElement = {
-  type: 'heading-one'
-  children: Descendant[]
-  lineNumber: number
-}
+// export type HeadingOneElement = {
+//   type: 'heading-one'
+//   children: Descendant[]
+//   lineNumber: number
+// }
 
-export type HeadingTwoElement = {
-  type: 'heading-two'
-  children: Descendant[]
-  lineNumber: number
-}
+// export type HeadingTwoElement = {
+//   type: 'heading-two'
+//   children: Descendant[]
+//   lineNumber: number
+// }
 
-export type BlockQuoteElement = {
-  type: 'block-quote'
-  children: Descendant[]
-  lineNumber: number
-}
+// export type BlockQuoteElement = {
+//   type: 'block-quote'
+//   children: Descendant[]
+//   lineNumber: number
+// }
 
 type CustomElement =
   | MultiBlockElement
-  | SingleBlockElement
-  | { type: null, children: Descendant[], lineNumber: number }
   | {
     type: string
     align?: string
     children: Descendant[]
-    lineNumber: number
+    lineNumber?: number
+    startIndex?: number
+    endIndex?: number
   }
-
-export interface MyNodeTypes extends NodeTypes {
-  paragraph: 'paragraph'
-  block_quote: 'block-quote'
-  code_block: 'code-block'
-  link: 'link'
-  ul_list: 'bulleted-list'
-  ol_list: 'numbered-list'
-  listItem: 'list-item'
-  heading: {
-    1: 'heading-one'
-    2: 'heading-two'
-    3: 'heading-three'
-    4: 'heading-four'
-    5: 'heading-five'
-    6: 'heading-six'
-  }
-  emphasis_mark: 'italic'
-  strong_mark: 'bold'
-  delete_mark: 'strikeThrough'
-  inline_code_mark: 'code'
-  thematic_break: 'thematic_break'
-  image: 'image'
-}
 
 export type CustomText = {
   text: string
@@ -155,4 +134,28 @@ declare module 'slate' {
       [key: string]: unknown
     }
   }
+}
+
+export interface MyNodeTypes extends NodeTypes {
+  paragraph: 'paragraph'
+  block_quote: 'block-quote'
+  code_block: 'code-block'
+  link: 'link'
+  ul_list: 'bulleted-list'
+  ol_list: 'numbered-list'
+  listItem: 'list-item'
+  heading: {
+    1: 'heading-one'
+    2: 'heading-two'
+    3: 'heading-three'
+    4: 'heading-four'
+    5: 'heading-five'
+    6: 'heading-six'
+  }
+  emphasis_mark: 'italic'
+  strong_mark: 'bold'
+  delete_mark: 'strikeThrough'
+  inline_code_mark: 'code'
+  thematic_break: 'thematic_break'
+  image: 'image'
 }
