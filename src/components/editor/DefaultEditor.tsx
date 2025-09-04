@@ -71,13 +71,14 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
     currentOffset: 0, // 偏移量
   })
 
-  let flattedArr = flatArr(value)
+  let flattedArr = useMemo(() => flatArr(value), [value])
   const [positions, setPosition] = useState<VSPosition[]>(() =>
     positionInit(flattedArr, visibleState.initItemHeight))
 
   useEffect(() => {
-
-  }, [value, visibleState.initItemHeight])
+    const initPos = positionInit(flattedArr, visibleState.initItemHeight)
+    setPosition(initPos)
+  }, [flattedArr, visibleState.initItemHeight])
 
   // visibleState初始化
   useEffect(() => {
@@ -142,6 +143,7 @@ const DefaultEditor: React.FC<NoteProps> = ({ isScratchpad }) => {
         },
       })
       Transforms.insertFragment(editor, value)
+      setPosition(positionInit(flattedArr, visibleState.initItemHeight))
       // 强制重置选区
       Transforms.deselect(editor)
       // 清空操作历史
